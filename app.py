@@ -47,15 +47,15 @@ def validate_dimensions(height, width):
     return height, width
 
 
-def generate_image(prompt, style, height=768, width=768):
+def generate_image(prompt, style, height=1500, width=1500):
     """
     Generate an image with the specified prompt, style, and dimensions.
 
     Args:
         prompt (str): The text prompt for image generation.
         style (str): The artistic style to apply to the image.
-        height (int): Height of the generated image (default is 768).
-        width (int): Width of the generated image (default is 768).
+        height (int): Height of the generated image (default is 1500).
+        width (int): Width of the generated image (default is 1500).
 
     Returns:
         PIL.Image: The generated image.
@@ -94,8 +94,8 @@ def generate_image_route():
         style = request.form['style']
 
         # Optional: Allow users to specify height and width via form inputs
-        height = int(request.form.get('height', 768))  # Default to 768 if not provided
-        width = int(request.form.get('width', 768))  # Default to 768 if not provided
+        height = int(request.form.get('height', 1500))  # Default to 1500 if not provided
+        width = int(request.form.get('width', 1500))  # Default to 1500 if not provided
 
         # Validate dimensions
         height, width = validate_dimensions(height, width)
