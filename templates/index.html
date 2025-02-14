@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #1a73e8;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #f8f9fa;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1a73e8;
+            background-color: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #generateBtn {
+            background-color: #1a73e8;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        #generateBtn:hover:not(:disabled) {
+            background-color: #1557b0;
+        }
+
+        #generateBtn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #downloadBtn {
+            background-color: #00a67e;
+            color: white;
+            display: none;
+        }
+
+        #downloadBtn:hover {
+            background-color: #008f6c;
+        }
+
+        #imageContainer {
+            margin-top: 20px;
+            display: none;
+        }
+
+        #generatedImage {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            color: #d32f2f;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Image Generator</h1>
+        <form id="generateForm">
+            <div class="form-group">
+                <label for="prompt">Prompt:</label>
+                <input type="text" id="prompt" name="prompt" required placeholder="Describe the image you want to generate">
+            </div>
+            <div class="form-group">
+                <label for="style">Style:</label>
+                <select id="style" name="style">
+                    <option value="realistic">Realistic</option>
+                    <option value="fantasy">Fantasy</option>
+                    <option value="digital art">Digital Art</option>
+                    <option value="abstract">Abstract</option>
+                    <option value="cartoon">Cartoon</option>
+                    <option value="oil painting">Oil Painting</option>
+                    <option value="watercolor">Watercolor</option>
+                    <option value="pencil sketch">Pencil Sketch</option>
+                </select>
+            </div>
+            <button type="submit" id="generateBtn">Generate Image</button>
+        </form>
+        <div id="error-message" class="error-message"></div>
+        <div id="imageContainer">
+            <img id="generatedImage" alt="Generated Image">
+            <button id="downloadBtn">Download Image</button>
+        </div>
+    </div>
+    <script>
+        document.getElementById('generateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const generateBtn = document.getElementById('generateBtn');
+            const errorMessage = document.getElementById('error-message');
+            const formData = new FormData(this);
+
+            // Update button state
+            generateBtn.innerHTML = '<span class="loading-spinner"></span>Generating...';
+            generateBtn.disabled = true;
+            errorMessage.style.display = 'none';
+
+            fetch('/generate', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const img = document.getElementById('generatedImage');
+                    img.src = 'data:image/png;base64,' + data.image;
+                    document.getElementById('imageContainer').style.display = 'block';
+                    document.getElementById('downloadBtn').style.display = 'block';
+                } else {
+                    throw new Error(data.error || 'Failed to generate image');
+                }
+            })
+            .catch(error => {
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                generateBtn.innerHTML = 'Generate Image';
+                generateBtn.disabled = false;
+            });
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const img = document.getElementById('generatedImage');
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = 'generated_image.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
+</body>
+</html>
