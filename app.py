@@ -16,7 +16,6 @@ def load_model():
         model_id,
         torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
     )
-
     # Move to GPU if available
     if torch.cuda.is_available():
         pipe = pipe.to("cuda")
@@ -31,19 +30,53 @@ except Exception as e:
     pipe = None
 
 
-def generate_image(prompt, style):
+def validate_dimensions(height, width):
+    """
+    Ensure height and width are divisible by 8.
+    If not, adjust them to the nearest valid values.
+
+    Args:
+        height (int): Desired height.
+        width (int): Desired width.
+
+    Returns:
+        tuple: Valid (height, width) divisible by 8.
+    """
+    height = (height // 8) * 8
+    width = (width // 8) * 8
+    return height, width
+
+
+def generate_image(prompt, style, height=768, width=768):
+    """
+    Generate an image with the specified prompt, style, and dimensions.
+
+    Args:
+        prompt (str): The text prompt for image generation.
+        style (str): The artistic style to apply to the image.
+        height (int): Height of the generated image (default is 768).
+        width (int): Width of the generated image (default is 768).
+
+    Returns:
+        PIL.Image: The generated image.
+    """
     if pipe is None:
         raise Exception("Model not loaded properly")
+
+    # Validate dimensions
+    height, width = validate_dimensions(height, width)
 
     # Combine prompt with style
     full_prompt = f"{prompt}, {style} style, highly detailed, professional"
 
-    # Generate the image
+    # Generate the image with custom dimensions
     with torch.no_grad():
         image = pipe(
             full_prompt,
             num_inference_steps=30,
-            guidance_scale=7.5
+            guidance_scale=7.5,
+            height=height,
+            width=width
         ).images[0]
 
     return image
@@ -60,8 +93,15 @@ def generate_image_route():
         prompt = request.form['prompt']
         style = request.form['style']
 
+        # Optional: Allow users to specify height and width via form inputs
+        height = int(request.form.get('height', 768))  # Default to 768 if not provided
+        width = int(request.form.get('width', 768))  # Default to 768 if not provided
+
+        # Validate dimensions
+        height, width = validate_dimensions(height, width)
+
         # Generate image using Stable Diffusion
-        img = generate_image(prompt, style)
+        img = generate_image(prompt, style, height, width)
 
         # Convert to base64
         buffered = io.BytesIO()
@@ -70,7 +110,9 @@ def generate_image_route():
 
         return jsonify({
             'success': True,
-            'image': img_str
+            'image': img_str,
+            'height': height,
+            'width': width
         })
     except Exception as e:
         return jsonify({
