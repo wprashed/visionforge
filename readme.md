@@ -1,4 +1,4 @@
-# Stable Diffusion Image Generator
+# Vision Forge - Stable Diffusion Image Generator
 
 This is a Flask-based web application that generates images using the **Stable Diffusion** model. Users can provide a text prompt and select an artistic style to generate highly detailed and professional images. The application also supports custom image dimensions (height and width) as long as they are divisible by 8.
 
