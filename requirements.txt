@@ -1,1 +1,4 @@
-
+flask
+torch
+diffusers
+pillow
