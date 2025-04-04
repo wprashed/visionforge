@@ -2,7 +2,7 @@ import os
 import base64
 from flask import Flask, render_template, request, jsonify
 import torch
-from diffusers import StableDiffusionPipeline
+from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 from PIL import Image
 import io
 import gc
@@ -10,24 +10,78 @@ import gc
 app = Flask(__name__)
 
 # Constants
-MAX_DIMENSION = 1500
-MIN_DIMENSION = 256
-STEP_SIZE = 8
+MIN_DIMENSION = 256  # Minimum dimension for stability
+STEP_SIZE = 8  # Ensure dimensions are multiples of 8
+MAX_REASONABLE_DIM = 2048  # Warning threshold, not a hard limit
+
+# Style presets with their prompt modifiers
+STYLE_PRESETS = {
+    "realistic": {
+        "prompt_prefix": "realistic, photorealistic, highly detailed, professional photography, 8k, ",
+        "prompt_suffix": ", hyperrealistic, photographic, detailed texture, natural lighting",
+        "negative_prompt": "cartoon, anime, illustration, painting, drawing, unrealistic, low quality"
+    },
+    "digital_art": {
+        "prompt_prefix": "digital art, digital painting, trending on artstation, highly detailed, ",
+        "prompt_suffix": ", vibrant colors, sharp focus, concept art, 4k, detailed",
+        "negative_prompt": "photograph, photo, realistic, blurry, grainy, noisy, low quality"
+    },
+    "ghibli": {
+        "prompt_prefix": "studio ghibli style, anime, hayao miyazaki, hand-drawn, colorful, whimsical, ",
+        "prompt_suffix": ", fantasy, dreamy, soft lighting, painterly",
+        "negative_prompt": "photorealistic, 3d render, photograph, realistic, grainy, noisy"
+    },
+    "fantasy": {
+        "prompt_prefix": "fantasy art style, magical, ethereal, mystical, ",
+        "prompt_suffix": ", vibrant, detailed, epic scene, dramatic lighting, fantasy illustration",
+        "negative_prompt": "mundane, realistic, photograph, modern, urban"
+    },
+    "cyberpunk": {
+        "prompt_prefix": "cyberpunk style, neon lights, futuristic, dystopian, high tech, ",
+        "prompt_suffix": ", dark atmosphere, rain, reflective surfaces, night scene, blade runner style",
+        "negative_prompt": "natural, daytime, bright, cheerful, rural, historical"
+    },
+    "oil_painting": {
+        "prompt_prefix": "oil painting, traditional art, textured canvas, brush strokes visible, ",
+        "prompt_suffix": ", rich colors, classical painting technique, gallery quality",
+        "negative_prompt": "digital art, 3d render, photograph, smooth, flat colors"
+    },
+    "none": {
+        "prompt_prefix": "",
+        "prompt_suffix": ", high quality, detailed",
+        "negative_prompt": "low quality, blurry, distorted"
+    }
+}
 
 
 # Initialize the model globally
 def load_model():
+    # Use SD 1.5 for better quality
     model_id = "runwayml/stable-diffusion-v1-5"
+
     pipe = StableDiffusionPipeline.from_pretrained(
         model_id,
-        torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
+        torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+        safety_checker=None,
+        requires_safety_checker=False
+    )
+
+    # Use DPMSolverMultistepScheduler for faster inference with good quality
+    pipe.scheduler = DPMSolverMultistepScheduler.from_config(
+        pipe.scheduler.config,
+        algorithm_type="dpmsolver++",
+        solver_order=2
     )
 
     if torch.cuda.is_available():
         pipe = pipe.to("cuda")
-
-    # Enable attention slicing for memory efficiency
-    pipe.enable_attention_slicing()
+        pipe.enable_attention_slicing(1)
+        # Enable memory efficient attention if available
+        if hasattr(pipe, "enable_xformers_memory_efficient_attention"):
+            pipe.enable_xformers_memory_efficient_attention()
+    else:
+        pipe = pipe.to("cpu")
+        pipe.enable_attention_slicing(1)
 
     return pipe
 
@@ -41,25 +95,14 @@ except Exception as e:
 
 
 def validate_dimensions(height, width):
-    """
-    Validate and adjust image dimensions.
-
-    Args:
-        height (int): Desired height
-        width (int): Desired width
-
-    Returns:
-        tuple: Validated (height, width)
-
-    Raises:
-        ValueError: If dimensions are invalid
-    """
-    # Ensure dimensions are within bounds
+    """Validate and adjust image dimensions."""
+    # Ensure dimensions are at least the minimum
     if height < MIN_DIMENSION or width < MIN_DIMENSION:
         raise ValueError(f"Dimensions must be at least {MIN_DIMENSION}x{MIN_DIMENSION} pixels")
 
-    if height > MAX_DIMENSION or width > MAX_DIMENSION:
-        raise ValueError(f"Dimensions must not exceed {MAX_DIMENSION}x{MAX_DIMENSION} pixels")
+    # Warning for very large dimensions (but allow them)
+    if height > MAX_REASONABLE_DIM or width > MAX_REASONABLE_DIM:
+        print(f"Warning: Large dimensions requested ({width}x{height}). This may cause memory issues.")
 
     # Round to nearest multiple of STEP_SIZE
     height = (height // STEP_SIZE) * STEP_SIZE
@@ -68,45 +111,117 @@ def validate_dimensions(height, width):
     return height, width
 
 
-def generate_image(prompt, height=1024, width=1024):
-    """
-    Generate an image using Stable Diffusion.
-
-    Args:
-        prompt (str): The text prompt for image generation
-        height (int): Height of the generated image
-        width (int): Width of the generated image
-
-    Returns:
-        PIL.Image: The generated image
-
-    Raises:
-        Exception: If model isn't loaded or generation fails
-    """
+def generate_image(prompt, height=1024, width=1024, style="none"):
+    """Generate an image with the specified style and dimensions."""
     if pipe is None:
         raise Exception("Model not loaded properly")
 
     # Validate dimensions
     height, width = validate_dimensions(height, width)
 
-    # Enhance prompt for better results
-    enhanced_prompt = f"{prompt}, highly detailed, professional quality, 4k"
+    # Get style preset (default to "none" if style not found)
+    style_preset = STYLE_PRESETS.get(style.lower(), STYLE_PRESETS["none"])
+
+    # Apply style to prompt
+    styled_prompt = f"{style_preset['prompt_prefix']}{prompt}{style_preset['prompt_suffix']}"
+
+    # Process prompt to handle quantity specifications
+    contains_single = any(word in prompt.lower() for word in ["a ", "one ", "single ", "1 "])
+    contains_plural = any(
+        word in prompt.lower() for word in ["multiple ", "many ", "group ", "several ", "two ", "three ", "four "])
+
+    # Check for proper names (capitalized words)
+    words = prompt.split()
+    has_name = any(word[0].isupper() and len(word) > 1 for word in words if len(word) > 1)
+
+    # Add anti-duplication to negative prompt
+    base_negative = style_preset['negative_prompt']
+
+    if has_name or contains_single:
+        # Emphasize singularity for named entities or when "a/one" is specified
+        styled_prompt = f"single {styled_prompt}, solo portrait, only one person, isolated subject"
+        negative_prompt = f"{base_negative}, multiple people, duplicated, clone, twins, double, two, copies, group, crowd"
+    else:
+        negative_prompt = base_negative
+
+    # Determine optimal inference steps based on image size
+    total_pixels = height * width
+    if total_pixels > 1048576:  # 1024x1024
+        inference_steps = 25  # Fewer steps for very large images
+        guidance_scale = 7.5
+    else:
+        inference_steps = 30  # More steps for standard images
+        guidance_scale = 8.0
+
+    # Progressive generation for very large images
+    max_size_per_pass = 1048576  # 1024x1024 pixels
+    if total_pixels > max_size_per_pass and (height > 1024 or width > 1024):
+        # Generate at lower resolution first, then upscale
+        scale_factor = max(1, (total_pixels / max_size_per_pass) ** 0.5)
+        gen_height = int(height / scale_factor)
+        gen_width = int(width / scale_factor)
+
+        # Ensure dimensions are multiples of 8
+        gen_height = (gen_height // STEP_SIZE) * STEP_SIZE
+        gen_width = (gen_width // STEP_SIZE) * STEP_SIZE
+
+        progressive = True
+    else:
+        gen_height = height
+        gen_width = width
+        progressive = False
 
     try:
-        # Generate the image
+        # Generate with optimized settings
         with torch.no_grad():
-            image = pipe(
-                enhanced_prompt,
-                num_inference_steps=30,
-                guidance_scale=7.5,
-                height=height,
-                width=width
-            ).images[0]
+            try:
+                result = pipe(
+                    styled_prompt,
+                    negative_prompt=negative_prompt,
+                    num_inference_steps=inference_steps,
+                    guidance_scale=guidance_scale,
+                    height=gen_height,
+                    width=gen_width
+                )
+                image = result.images[0]
 
-        # Clear CUDA cache if using GPU
+                # Upscale if needed
+                if progressive:
+                    print(f"Upscaling from {gen_width}x{gen_height} to {width}x{height}")
+                    image = image.resize((width, height), Image.LANCZOS)
+
+            except RuntimeError as e:
+                # Handle out-of-memory errors
+                if "out of memory" in str(e).lower():
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                        gc.collect()
+
+                    # Try with smaller dimensions and fewer steps
+                    new_height = max(height // 2, MIN_DIMENSION)
+                    new_width = max(width // 2, MIN_DIMENSION)
+                    new_height = (new_height // STEP_SIZE) * STEP_SIZE
+                    new_width = (new_width // STEP_SIZE) * STEP_SIZE
+
+                    print(f"OOM error. Retrying with {new_width}x{new_height}")
+
+                    result = pipe(
+                        styled_prompt,
+                        negative_prompt=negative_prompt,
+                        num_inference_steps=20,  # Reduced steps
+                        guidance_scale=7.5,
+                        height=new_height,
+                        width=new_width
+                    )
+                    image = result.images[0]
+                    image = image.resize((width, height), Image.LANCZOS)
+                else:
+                    raise e
+
+        # Clear memory
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-            gc.collect()
+        gc.collect()
 
         return image
 
@@ -134,19 +249,23 @@ def generate_image_route():
         except ValueError:
             raise ValueError("Invalid dimensions provided")
 
+        # Get style preset
+        style = request.form.get('style', 'none')
+
         # Generate image
-        img = generate_image(prompt, height, width)
+        img = generate_image(prompt, height, width, style)
 
         # Convert to base64
         buffered = io.BytesIO()
-        img.save(buffered, format="PNG", quality=95)
+        img.save(buffered, format="JPEG", quality=90, optimize=True)
         img_str = base64.b64encode(buffered.getvalue()).decode()
 
         return jsonify({
             'success': True,
             'image': img_str,
             'height': height,
-            'width': width
+            'width': width,
+            'style': style
         })
 
     except ValueError as ve:
@@ -165,7 +284,7 @@ def generate_image_route():
         # Cleanup
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-            gc.collect()
+        gc.collect()
 
 
 if __name__ == '__main__':
