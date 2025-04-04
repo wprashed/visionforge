@@ -3,406 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Generator</title>
+    <title>Vision Forge - AI Image Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --success: #059669;
-            --success-hover: #047857;
-            --border: #e5e7eb;
-            --text: #1f2937;
-            --text-secondary: #6b7280;
-            --background: #ffffff;
-            --background-secondary: #f9fafb;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-
         body {
-            background-color: var(--background-secondary);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
         }
-
-        .container {
-            background: var(--background);
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            width: 100%;
-            max-width: 800px;
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         }
-
-        h1 {
-            font-size: 2.25rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 2rem;
-            background: linear-gradient(to right, var(--primary), #7c3aed);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        .form-group {
-            margin-bottom: 1.5rem;
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            transition: all 0.3s ease;
         }
-
-        label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: var(--text);
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-2px);
         }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            transition: all 0.2s;
+        .input-field {
+            background-color: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            transition: all 0.3s ease;
         }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
         }
-
-        .aspect-ratio-group {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .aspect-ratio-option {
-            background: var(--background);
-            border: 2px solid var(--border);
-            border-radius: 0.5rem;
-            padding: 1rem;
+        .style-option {
             cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
         }
-
-        .aspect-ratio-option:hover {
-            border-color: var(--primary);
-            background: var(--background-secondary);
+        .style-option:hover {
+            transform: translateY(-2px);
         }
-
-        .aspect-ratio-option.active {
-            border-color: var(--primary);
-            background: rgba(37, 99, 235, 0.1);
+        .style-option.selected {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.2);
         }
-
-        .aspect-ratio-option .label {
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .aspect-ratio-option .size {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .dimensions-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .slider-container {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .slider-with-input {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        input[type="range"] {
-            flex: 1;
-            -webkit-appearance: none;
-            height: 6px;
-            background: var(--border);
-            border-radius: 3px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: var(--primary);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-        }
-
-        input[type="number"] {
-            width: 80px;
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            text-align: center;
-        }
-
-        button {
-            width: 100%;
-            padding: 0.875rem 1.5rem;
-            border: none;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        #generateBtn {
-            background: var(--primary);
-            color: white;
-            margin-bottom: 1rem;
-        }
-
-        #generateBtn:hover:not(:disabled) {
-            background: var(--primary-hover);
-        }
-
-        #generateBtn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        #downloadBtn {
-            background: var(--success);
-            color: white;
-            display: none;
-        }
-
-        #downloadBtn:hover {
-            background: var(--success-hover);
-        }
-
-        #imageContainer {
-            margin-top: 1.5rem;
-            display: none;
-        }
-
-        #generatedImage {
-            width: 100%;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
         .loading-spinner {
-            display: inline-block;
-            width: 1.25rem;
-            height: 1.25rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
+            border-top-color: #3b82f6;
             animation: spin 1s linear infinite;
-            margin-right: 0.5rem;
         }
-
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-
-        .error-message {
-            color: #dc2626;
-            text-align: center;
-            margin-top: 1rem;
-            display: none;
+        .aspect-ratio-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
         }
-
-        @media (max-width: 640px) {
-            .aspect-ratio-group {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .dimensions-group {
-                grid-template-columns: 1fr;
-            }
-
-            .container {
-                padding: 1.5rem;
-            }
+        .aspect-ratio-btn {
+            padding: 5px 10px;
+            background-color: rgba(30, 41, 59, 0.8);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .aspect-ratio-btn:hover, .aspect-ratio-btn.selected {
+            background-color: #3b82f6;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>AI Image Generator</h1>
-        <form id="generateForm">
-            <div class="form-group">
-                <label for="prompt">Prompt</label>
-                <input type="text" id="prompt" name="prompt" required
-                       placeholder="Describe the image you want to generate">
+<body class="min-h-screen py-8">
+    <div class="container mx-auto px-4">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-600">Vision Forge</h1>
+            <p class="text-lg text-gray-400">Create stunning AI-generated images with unlimited possibilities</p>
+        </header>
+
+        <div class="max-w-4xl mx-auto">
+            <div class="card rounded-xl shadow-2xl p-6 md:p-8">
+                <div class="mb-6">
+                    <label for="prompt" class="block text-lg font-medium mb-2">Describe your image</label>
+                    <textarea id="prompt" rows="3" class="input-field w-full rounded-lg p-3 resize-none" placeholder="A majestic mountain landscape with a lake at sunset..."></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-lg font-medium mb-3">Choose a style</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        <div class="style-option rounded-lg p-3 text-center selected" data-style="none">
+                            <div class="bg-gradient-to-br from-gray-700 to-gray-900 h-16 rounded-lg mb-2 flex items-center justify-center">
+                                <span>Standard</span>
+                            </div>
+                            <span class="text-sm">No Style</span>
+                        </div>
+                        <div class="style-option rounded-lg p-3 text-center" data-style="realistic">
+                            <div class="bg-gradient-to-br from-gray-400 to-gray-700 h-16 rounded-lg mb-2"></div>
+                            <span class="text-sm">Realistic</span>
+                        </div>
+                        <div class="style-option rounded-lg p-3 text-center" data-style="digital_art">
+                            <div class="bg-gradient-to-br from-blue-500 to-purple-600 h-16 rounded-lg mb-2"></div>
+                            <span class="text-sm">Digital Art</span>
+                        </div>
+                        <div class="style-option rounded-lg p-3 text-center" data-style="ghibli">
+                            <div class="bg-gradient-to-br from-green-400 to-blue-500 h-16 rounded-lg mb-2"></div>
+                            <span class="text-sm">Ghibli</span>
+                        </div>
+                        <div class="style-option rounded-lg p-3 text-center" data-style="fantasy">
+                            <div class="bg-gradient-to-br from-purple-400 to-pink-600 h-16 rounded-lg mb-2"></div>
+                            <span class="text-sm">Fantasy</span>
+                        </div>
+                        <div class="style-option rounded-lg p-3 text-center" data-style="cyberpunk">
+                            <div class="bg-gradient-to-br from-pink-500 to-yellow-500 h-16 rounded-lg mb-2"></div>
+                            <span class="text-sm">Cyberpunk</span>
+                        </div>
+                        <div class="style-option rounded-lg p-3 text-center" data-style="oil_painting">
+                            <div class="bg-gradient-to-br from-yellow-600 to-red-700 h-16 rounded-lg mb-2"></div>
+                            <span class="text-sm">Oil Painting</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-lg font-medium mb-3">Image Dimensions</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="width" class="block text-sm font-medium mb-1">Width (px)</label>
+                            <input type="number" id="width" class="input-field w-full rounded-lg p-3" value="1024" min="256" step="8">
+                        </div>
+                        <div>
+                            <label for="height" class="block text-sm font-medium mb-1">Height (px)</label>
+                            <input type="number" id="height" class="input-field w-full rounded-lg p-3" value="1024" min="256" step="8">
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <label class="block text-sm font-medium mb-2">Common Aspect Ratios</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="aspect-ratio-btn" data-width="1024" data-height="1024">1:1 Square</button>
+                            <button type="button" class="aspect-ratio-btn" data-width="1536" data-height="1024">3:2 Landscape</button>
+                            <button type="button" class="aspect-ratio-btn" data-width="1024" data-height="1536">2:3 Portrait</button>
+                            <button type="button" class="aspect-ratio-btn" data-width="1536" data-height="864">16:9 Widescreen</button>
+                            <button type="button" class="aspect-ratio-btn" data-width="1152" data-height="1536">3:4 Portrait</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="generate-btn" class="btn-primary w-full py-3 px-6 rounded-lg font-medium text-white shadow-lg">
+                    Generate Image
+                </button>
+
+                <div id="error-message" class="mt-4 text-red-500 hidden"></div>
             </div>
 
-            <div class="form-group">
-                <label>Aspect Ratio</label>
-                <div class="aspect-ratio-group">
-                    <div class="aspect-ratio-option" data-width="768" data-height="1152">
-                        <div class="label">Portrait</div>
-                        <div class="size">768×1152</div>
+            <div id="result" class="mt-8 hidden">
+                <div class="card rounded-xl shadow-2xl p-6 md:p-8">
+                    <h2 class="text-2xl font-bold mb-4">Your Generated Image</h2>
+                    <div class="relative">
+                        <img id="generated-image" class="w-full h-auto rounded-lg shadow-lg" src="/placeholder.svg" alt="Generated image">
+                        <div id="download-overlay" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-lg">
+                            <button id="download-btn" class="bg-white text-gray-900 py-2 px-4 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                                Download Image
+                            </button>
+                        </div>
                     </div>
-                    <div class="aspect-ratio-option active" data-width="1152" data-height="768">
-                        <div class="label">Landscape</div>
-                        <div class="size">1152×768</div>
-                    </div>
-                    <div class="aspect-ratio-option" data-width="1024" data-height="1024">
-                        <div class="label">Square</div>
-                        <div class="size">1024×1024</div>
-                    </div>
-                    <div class="aspect-ratio-option" data-custom="true">
-                        <div class="label">Custom</div>
-                        <div class="size">custom</div>
+                    <div class="mt-4 text-sm text-gray-400">
+                        <p id="image-info"></p>
                     </div>
                 </div>
             </div>
 
-            <div class="dimensions-group">
-                <div class="slider-container">
-                    <label for="width">Width</label>
-                    <div class="slider-with-input">
-                        <input type="range" id="widthSlider" min="256" max="1500" step="8" value="1152">
-                        <input type="number" id="width" name="width" min="256" max="1500" step="8" value="1152">
-                    </div>
-                </div>
-                <div class="slider-container">
-                    <label for="height">Height</label>
-                    <div class="slider-with-input">
-                        <input type="range" id="heightSlider" min="256" max="1500" step="8" value="768">
-                        <input type="number" id="height" name="height" min="256" max="1500" step="8" value="768">
-                    </div>
+            <div id="loading" class="mt-8 hidden">
+                <div class="card rounded-xl shadow-2xl p-8 text-center">
+                    <div class="loading-spinner w-12 h-12 border-4 border-blue-200 border-solid rounded-full mx-auto mb-4"></div>
+                    <h2 class="text-xl font-medium">Creating your masterpiece...</h2>
+                    <p class="text-gray-400 mt-2">This may take a minute or two depending on the image size.</p>
                 </div>
             </div>
-
-            <button type="submit" id="generateBtn">Generate Image</button>
-        </form>
-
-        <div id="error-message" class="error-message"></div>
-
-        <div id="imageContainer">
-            <img id="generatedImage" alt="Generated Image">
-            <button id="downloadBtn">Download Image</button>
         </div>
     </div>
 
     <script>
-        // Handle aspect ratio selection and dimension updates
-        const aspectRatioOptions = document.querySelectorAll('.aspect-ratio-option');
-        const widthSlider = document.getElementById('widthSlider');
-        const heightSlider = document.getElementById('heightSlider');
-        const widthInput = document.getElementById('width');
-        const heightInput = document.getElementById('height');
-
-        function updateDimensionControls(element, value) {
-            const slider = element.id.includes('Slider') ? element : document.getElementById(`${element.id}Slider`);
-            const input = element.id.includes('Slider') ? document.getElementById(element.id.replace('Slider', '')) : element;
-
-            slider.value = value;
-            input.value = value;
-        }
-
-        function roundTo8(num) {
-            return Math.round(num / 8) * 8;
-        }
-
-        aspectRatioOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                aspectRatioOptions.forEach(opt => opt.classList.remove('active'));
-                option.classList.add('active');
-
-                if (!option.dataset.custom) {
-                    updateDimensionControls(widthInput, option.dataset.width);
-                    updateDimensionControls(heightInput, option.dataset.height);
-                }
-            });
-        });
-
-        [widthSlider, heightSlider, widthInput, heightInput].forEach(control => {
-            control.addEventListener('input', (e) => {
-                const value = roundTo8(parseInt(e.target.value));
-                updateDimensionControls(e.target, value);
-
-                aspectRatioOptions.forEach(opt => opt.classList.remove('active'));
-                aspectRatioOptions[3].classList.add('active');
-            });
-        });
-
-        // Form submission handler
-        document.getElementById('generateForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const generateBtn = document.getElementById('generateBtn');
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generate-btn');
+            const promptInput = document.getElementById('prompt');
+            const widthInput = document.getElementById('width');
+            const heightInput = document.getElementById('height');
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            const generatedImage = document.getElementById('generated-image');
+            const downloadBtn = document.getElementById('download-btn');
+            const imageInfo = document.getElementById('image-info');
             const errorMessage = document.getElementById('error-message');
-            const formData = new FormData(this);
+            const styleOptions = document.querySelectorAll('.style-option');
+            const aspectRatioBtns = document.querySelectorAll('.aspect-ratio-btn');
 
-            generateBtn.innerHTML = '<span class="loading-spinner"></span>Generating...';
-            generateBtn.disabled = true;
-            errorMessage.style.display = 'none';
+            let selectedStyle = 'none';
 
-            fetch('/generate', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const img = document.getElementById('generatedImage');
-                    img.src = 'data:image/png;base64,' + data.image;
-                    document.getElementById('imageContainer').style.display = 'block';
-                    document.getElementById('downloadBtn').style.display = 'block';
-                } else {
-                    throw new Error(data.error || 'Failed to generate image');
-                }
-            })
-            .catch(error => {
-                errorMessage.textContent = error.message;
-                errorMessage.style.display = 'block';
-                console.error('Error:', error);
-            })
-            .finally(() => {
-                generateBtn.innerHTML = 'Generate Image';
-                generateBtn.disabled = false;
+            // Style selection
+            styleOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    styleOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedStyle = this.dataset.style;
+                });
             });
-        });
 
-        // Download button handler
-        document.getElementById('downloadBtn').addEventListener('click', function() {
-            const img = document.getElementById('generatedImage');
-            const link = document.createElement('a');
-            link.href = img.src;
-            link.download = 'generated_image.png';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            // Aspect ratio buttons
+            aspectRatioBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    aspectRatioBtns.forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    widthInput.value = this.dataset.width;
+                    heightInput.value = this.dataset.height;
+                });
+            });
+
+            // Generate image
+            generateBtn.addEventListener('click', async function() {
+                const prompt = promptInput.value.trim();
+                const width = parseInt(widthInput.value);
+                const height = parseInt(heightInput.value);
+
+                if (!prompt) {
+                    showError('Please enter a prompt to generate an image.');
+                    return;
+                }
+
+                if (isNaN(width) || isNaN(height) || width < 256 || height < 256) {
+                    showError('Dimensions must be at least 256px.');
+                    return;
+                }
+
+                // Hide previous results and errors, show loading
+                resultDiv.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+                loadingDiv.classList.remove('hidden');
+
+                // Disable generate button
+                generateBtn.disabled = true;
+                generateBtn.textContent = 'Generating...';
+
+                try {
+                    const formData = new FormData();
+                    formData.append('prompt', prompt);
+                    formData.append('width', width);
+                    formData.append('height', height);
+                    formData.append('style', selectedStyle);
+
+                    const response = await fetch('/generate', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Display the generated image
+                        generatedImage.src = `data:image/jpeg;base64,${data.image}`;
+                        imageInfo.textContent = `${data.width}×${data.height} • ${selectedStyle.replace('_', ' ')} style`;
+
+                        // Show result, hide loading
+                        loadingDiv.classList.add('hidden');
+                        resultDiv.classList.remove('hidden');
+
+                        // Setup download button
+                        downloadBtn.onclick = function() {
+                            const link = document.createElement('a');
+                            link.href = `data:image/jpeg;base64,${data.image}`;
+                            link.download = `vision-forge-${Date.now()}.jpg`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        };
+                    } else {
+                        throw new Error(data.error || 'Failed to generate image');
+                    }
+                } catch (error) {
+                    loadingDiv.classList.add('hidden');
+                    showError(error.message);
+                } finally {
+                    // Re-enable generate button
+                    generateBtn.disabled = false;
+                    generateBtn.textContent = 'Generate Image';
+                }
+            });
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('hidden');
+            }
         });
     </script>
 </body>
