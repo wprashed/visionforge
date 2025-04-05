@@ -28,6 +28,15 @@
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             transform: translateY(-2px);
         }
+        .btn-secondary {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(30, 41, 59, 1);
+            transform: translateY(-2px);
+        }
         .input-field {
             background-color: rgba(15, 23, 42, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -73,6 +82,70 @@
         }
         .aspect-ratio-btn:hover, .aspect-ratio-btn.selected {
             background-color: #3b82f6;
+        }
+        .tab {
+            cursor: pointer;
+            padding: 10px 20px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .tab.active {
+            border-bottom-color: #3b82f6;
+            color: white;
+        }
+        .canvas-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+        }
+        #edit-canvas {
+            cursor: crosshair;
+        }
+        .brush-size-slider {
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #1e293b;
+            outline: none;
+        }
+        .brush-size-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+        .brush-size-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+        .range-slider {
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #1e293b;
+            outline: none;
+        }
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+        .range-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -131,22 +204,22 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label for="width" class="block text-sm font-medium mb-1">Width (px)</label>
-                            <input type="number" id="width" class="input-field w-full rounded-lg p-3" value="1024" min="256" step="8">
+                            <input type="number" id="width" class="input-field w-full rounded-lg p-3" value="512" min="256" step="8">
                         </div>
                         <div>
                             <label for="height" class="block text-sm font-medium mb-1">Height (px)</label>
-                            <input type="number" id="height" class="input-field w-full rounded-lg p-3" value="1024" min="256" step="8">
+                            <input type="number" id="height" class="input-field w-full rounded-lg p-3" value="512" min="256" step="8">
                         </div>
                     </div>
-
+                    
                     <div class="mt-3">
                         <label class="block text-sm font-medium mb-2">Common Aspect Ratios</label>
                         <div class="flex flex-wrap gap-2">
-                            <button type="button" class="aspect-ratio-btn" data-width="1024" data-height="1024">1:1 Square</button>
-                            <button type="button" class="aspect-ratio-btn" data-width="1536" data-height="1024">3:2 Landscape</button>
-                            <button type="button" class="aspect-ratio-btn" data-width="1024" data-height="1536">2:3 Portrait</button>
-                            <button type="button" class="aspect-ratio-btn" data-width="1536" data-height="864">16:9 Widescreen</button>
-                            <button type="button" class="aspect-ratio-btn" data-width="1152" data-height="1536">3:4 Portrait</button>
+                            <button type="button" class="aspect-ratio-btn" data-width="512" data-height="512">1:1 Square</button>
+                            <button type="button" class="aspect-ratio-btn" data-width="768" data-height="512">3:2 Landscape</button>
+                            <button type="button" class="aspect-ratio-btn" data-width="512" data-height="768">2:3 Portrait</button>
+                            <button type="button" class="aspect-ratio-btn" data-width="768" data-height="432">16:9 Widescreen</button>
+                            <button type="button" class="aspect-ratio-btn" data-width="576" data-height="768">3:4 Portrait</button>
                         </div>
                     </div>
                 </div>
@@ -161,16 +234,103 @@
             <div id="result" class="mt-8 hidden">
                 <div class="card rounded-xl shadow-2xl p-6 md:p-8">
                     <h2 class="text-2xl font-bold mb-4">Your Generated Image</h2>
-                    <div class="relative">
-                        <img id="generated-image" class="w-full h-auto rounded-lg shadow-lg" src="/placeholder.svg" alt="Generated image">
-                        <div id="download-overlay" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-lg">
-                            <button id="download-btn" class="bg-white text-gray-900 py-2 px-4 rounded-lg font-medium hover:bg-gray-100 transition-colors">
-                                Download Image
-                            </button>
+                    
+                    <!-- Tabs for different editing modes -->
+                    <div class="flex border-b border-gray-700 mb-6">
+                        <div class="tab active" data-tab="view">View</div>
+                        <div class="tab" data-tab="edit">Edit Image</div>
+                        <div class="tab" data-tab="optimize">Optimize</div>
+                    </div>
+                    
+                    <!-- View Tab Content -->
+                    <div id="view-tab" class="tab-content">
+                        <div class="relative">
+                            <img id="generated-image" class="w-full h-auto rounded-lg shadow-lg" src="/placeholder.svg" alt="Generated image">
+                            <div id="download-overlay" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-lg">
+                                <button id="download-btn" class="bg-white text-gray-900 py-2 px-4 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                                    Download Image
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-400">
+                            <p id="image-info"></p>
                         </div>
                     </div>
-                    <div class="mt-4 text-sm text-gray-400">
-                        <p id="image-info"></p>
+                    
+                    <!-- Edit Tab Content -->
+                    <div id="edit-tab" class="tab-content hidden">
+                        <div class="mb-4">
+                            <label for="edit-prompt" class="block text-sm font-medium mb-2">Describe what to change in the selected area</label>
+                            <textarea id="edit-prompt" rows="2" class="input-field w-full rounded-lg p-3 resize-none" placeholder="Make this area look like a sunset..."></textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Brush Size</label>
+                            <input type="range" id="brush-size" class="brush-size-slider w-full" min="5" max="100" value="20">
+                        </div>
+                        
+                        <div class="flex gap-4 mb-4">
+                            <button id="clear-mask-btn" class="btn-secondary py-2 px-4 rounded-lg text-sm">Clear Selection</button>
+                            <button id="apply-edit-btn" class="btn-primary py-2 px-4 rounded-lg text-sm">Apply Changes</button>
+                        </div>
+                        
+                        <div class="canvas-container">
+                            <canvas id="edit-canvas" class="w-full h-auto rounded-lg shadow-lg"></canvas>
+                        </div>
+                        
+                        <div class="mt-4 text-sm text-gray-400">
+                            <p>Paint over the areas you want to change, then describe the changes and click "Apply Changes".</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Optimize Tab Content -->
+                    <div id="optimize-tab" class="tab-content hidden">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Image Format</label>
+                            <div class="flex gap-3">
+                                <label class="flex items-center">
+                                    <input type="radio" name="format" value="jpeg" checked class="mr-2">
+                                    <span>JPEG</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="format" value="png" class="mr-2">
+                                    <span>PNG</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="format" value="webp" class="mr-2">
+                                    <span>WebP</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Quality: <span id="quality-value">85</span>%</label>
+                            <input type="range" id="quality-slider" class="range-slider w-full" min="1" max="100" value="85">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Resize Image</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="resize-width" class="block text-xs mb-1">Width (px)</label>
+                                    <input type="number" id="resize-width" class="input-field w-full rounded-lg p-2" placeholder="Original width">
+                                </div>
+                                <div>
+                                    <label for="resize-height" class="block text-xs mb-1">Height (px)</label>
+                                    <input type="number" id="resize-height" class="input-field w-full rounded-lg p-2" placeholder="Original height">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button id="apply-optimize-btn" class="btn-primary w-full py-2 px-4 rounded-lg text-sm">
+                            Apply Optimization
+                        </button>
+                        
+                        <div id="optimize-info" class="mt-4 text-sm text-gray-400 hidden">
+                            <p>Original: <span id="original-size"></span></p>
+                            <p>Optimized: <span id="optimized-size"></span></p>
+                            <p>Reduction: <span id="size-reduction"></span></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -187,6 +347,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Main elements
             const generateBtn = document.getElementById('generate-btn');
             const promptInput = document.getElementById('prompt');
             const widthInput = document.getElementById('width');
@@ -199,9 +360,41 @@
             const errorMessage = document.getElementById('error-message');
             const styleOptions = document.querySelectorAll('.style-option');
             const aspectRatioBtns = document.querySelectorAll('.aspect-ratio-btn');
-
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Edit tab elements
+            const editCanvas = document.getElementById('edit-canvas');
+            const editPrompt = document.getElementById('edit-prompt');
+            const brushSizeSlider = document.getElementById('brush-size');
+            const clearMaskBtn = document.getElementById('clear-mask-btn');
+            const applyEditBtn = document.getElementById('apply-edit-btn');
+            
+            // Optimize tab elements
+            const formatRadios = document.querySelectorAll('input[name="format"]');
+            const qualitySlider = document.getElementById('quality-slider');
+            const qualityValue = document.getElementById('quality-value');
+            const resizeWidth = document.getElementById('resize-width');
+            const resizeHeight = document.getElementById('resize-height');
+            const applyOptimizeBtn = document.getElementById('apply-optimize-btn');
+            const optimizeInfo = document.getElementById('optimize-info');
+            const originalSize = document.getElementById('original-size');
+            const optimizedSize = document.getElementById('optimized-size');
+            const sizeReduction = document.getElementById('size-reduction');
+            
+            // Canvas context and variables
+            let ctx;
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            let brushSize = 20;
+            let originalImageData;
+            let currentImageData;
+            let originalImageSize = { width: 0, height: 0 };
+            
             let selectedStyle = 'none';
-
+            let currentImageBase64;
+            
             // Style selection
             styleOptions.forEach(option => {
                 option.addEventListener('click', function() {
@@ -210,7 +403,7 @@
                     selectedStyle = this.dataset.style;
                 });
             });
-
+            
             // Aspect ratio buttons
             aspectRatioBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -220,60 +413,371 @@
                     heightInput.value = this.dataset.height;
                 });
             });
-
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.dataset.tab;
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+                    
+                    // Special handling for edit tab
+                    if (tabName === 'edit' && currentImageBase64) {
+                        setupEditCanvas();
+                    }
+                });
+            });
+            
+            // Quality slider
+            qualitySlider.addEventListener('input', function() {
+                qualityValue.textContent = this.value;
+            });
+            
+            // Brush size slider
+            brushSizeSlider.addEventListener('input', function() {
+                brushSize = parseInt(this.value);
+            });
+            
+            // Setup canvas for editing
+            function setupEditCanvas() {
+                const img = new Image();
+                img.onload = function() {
+                    // Set canvas dimensions to match image
+                    editCanvas.width = img.width;
+                    editCanvas.height = img.height;
+                    
+                    // Initialize canvas context
+                    ctx = editCanvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // Store original image data
+                    originalImageData = ctx.getImageData(0, 0, editCanvas.width, editCanvas.height);
+                    currentImageData = originalImageData;
+                    
+                    // Store original dimensions
+                    originalImageSize.width = img.width;
+                    originalImageSize.height = img.height;
+                    
+                    // Set resize placeholders
+                    resizeWidth.placeholder = img.width;
+                    resizeHeight.placeholder = img.height;
+                };
+                
+                // Remove data URL prefix if present
+                let imgSrc = currentImageBase64;
+                if (!imgSrc.startsWith('data:image')) {
+                    imgSrc = `data:image/png;base64,${imgSrc}`;
+                }
+                
+                img.src = imgSrc;
+                
+                // Setup canvas event listeners
+                editCanvas.addEventListener('mousedown', startDrawing);
+                editCanvas.addEventListener('mousemove', draw);
+                editCanvas.addEventListener('mouseup', stopDrawing);
+                editCanvas.addEventListener('mouseout', stopDrawing);
+                editCanvas.addEventListener('touchstart', handleTouch);
+                editCanvas.addEventListener('touchmove', handleTouchMove);
+                editCanvas.addEventListener('touchend', stopDrawing);
+            }
+            
+            // Drawing functions
+            function startDrawing(e) {
+                isDrawing = true;
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                ctx.beginPath();
+                ctx.arc(e.offsetX, e.offsetY, brushSize, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+                ctx.lineWidth = brushSize * 2;
+                ctx.stroke();
+                
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            // Touch support for mobile devices
+            function handleTouch(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                editCanvas.dispatchEvent(mouseEvent);
+            }
+            
+            function handleTouchMove(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = editCanvas.getBoundingClientRect();
+                const scaleX = editCanvas.width / rect.width;
+                const scaleY = editCanvas.height / rect.height;
+                
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY,
+                    offsetX: (touch.clientX - rect.left) * scaleX,
+                    offsetY: (touch.clientY - rect.top) * scaleY
+                });
+                editCanvas.dispatchEvent(mouseEvent);
+            }
+            
+            // Clear mask button
+            clearMaskBtn.addEventListener('click', function() {
+                if (ctx && originalImageData) {
+                    ctx.putImageData(originalImageData, 0, 0);
+                }
+            });
+            
+            // Apply edit button
+            applyEditBtn.addEventListener('click', async function() {
+                const prompt = editPrompt.value.trim();
+                if (!prompt) {
+                    alert('Please enter a description of what to change.');
+                    return;
+                }
+                
+                // Show loading
+                applyEditBtn.disabled = true;
+                applyEditBtn.textContent = 'Processing...';
+                
+                try {
+                    // Create mask image from canvas
+                    const maskCanvas = document.createElement('canvas');
+                    maskCanvas.width = editCanvas.width;
+                    maskCanvas.height = editCanvas.height;
+                    const maskCtx = maskCanvas.getContext('2d');
+                    
+                    // Extract red channel as mask (where we painted)
+                    const imageData = ctx.getImageData(0, 0, editCanvas.width, editCanvas.height);
+                    const maskData = maskCtx.createImageData(editCanvas.width, editCanvas.height);
+                    
+                    for (let i = 0; i < imageData.data.length; i += 4) {
+                        // If red channel has alpha > 0, it's part of our mask
+                        if (imageData.data[i] === 255 && imageData.data[i + 3] > 0) {
+                            maskData.data[i] = 255;     // R
+                            maskData.data[i + 1] = 255; // G
+                            maskData.data[i + 2] = 255; // B
+                            maskData.data[i + 3] = 255; // A
+                        } else {
+                            maskData.data[i] = 0;       // R
+                            maskData.data[i + 1] = 0;   // G
+                            maskData.data[i + 2] = 0;   // B
+                            maskData.data[i + 3] = 255; // A
+                        }
+                    }
+                    
+                    maskCtx.putImageData(maskData, 0, 0);
+                    
+                    // Convert mask to base64
+                    const maskBase64 = maskCanvas.toDataURL('image/png').split(',')[1];
+                    
+                    // Get original image
+                    let imageBase64 = currentImageBase64;
+                    if (imageBase64.startsWith('data:image')) {
+                        imageBase64 = imageBase64.split(',')[1];
+                    }
+                    
+                    // Send to server for inpainting
+                    const formData = new FormData();
+                    formData.append('image', imageBase64);
+                    formData.append('mask', maskBase64);
+                    formData.append('prompt', prompt);
+                    formData.append('style', selectedStyle);
+                    
+                    const response = await fetch('/inpaint', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Update the image
+                        currentImageBase64 = data.image;
+                        
+                        // Update both the view image and the edit canvas
+                        generatedImage.src = `data:image/png;base64,${data.image}`;
+                        
+                        // Reset the edit canvas with new image
+                        setupEditCanvas();
+                        
+                        // Switch to view tab to show result
+                        document.querySelector('.tab[data-tab="view"]').click();
+                    } else {
+                        throw new Error(data.error || 'Failed to edit image');
+                    }
+                } catch (error) {
+                    alert(`Error: ${error.message}`);
+                } finally {
+                    applyEditBtn.disabled = false;
+                    applyEditBtn.textContent = 'Apply Changes';
+                }
+            });
+            
+            // Apply optimization button
+            applyOptimizeBtn.addEventListener('click', async function() {
+                // Get selected format
+                let format = 'jpeg';
+                formatRadios.forEach(radio => {
+                    if (radio.checked) {
+                        format = radio.value;
+                    }
+                });
+                
+                // Get quality
+                const quality = parseInt(qualitySlider.value);
+                
+                // Get resize dimensions
+                const width = resizeWidth.value ? parseInt(resizeWidth.value) : null;
+                const height = resizeHeight.value ? parseInt(resizeHeight.value) : null;
+                
+                // Show loading
+                applyOptimizeBtn.disabled = true;
+                applyOptimizeBtn.textContent = 'Processing...';
+                
+                try {
+                    // Get original image
+                    let imageBase64 = currentImageBase64;
+                    if (imageBase64.startsWith('data:image')) {
+                        imageBase64 = imageBase64.split(',')[1];
+                    }
+                    
+                    // Send to server for optimization
+                    const formData = new FormData();
+                    formData.append('image', imageBase64);
+                    formData.append('format', format);
+                    formData.append('quality', quality);
+                    
+                    if (width && height) {
+                        formData.append('resize_width', width);
+                        formData.append('resize_height', height);
+                    }
+                    
+                    const response = await fetch('/optimize', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Update the image
+                        currentImageBase64 = data.image;
+                        
+                        // Update the view image
+                        const mimeType = format === 'jpg' ? 'jpeg' : format;
+                        generatedImage.src = `data:image/${mimeType};base64,${data.image}`;
+                        
+                        // Update image info
+                        imageInfo.textContent = `${data.width}×${data.height} • ${format.toUpperCase()} • ${data.size_kb} KB`;
+                        
+                        // Show optimization info
+                        optimizeInfo.classList.remove('hidden');
+                        
+                        // Calculate size reduction
+                        const originalSizeKB = Math.round(originalImageData.data.length / 1024);
+                        const newSizeKB = data.size_kb;
+                        const reduction = Math.round((1 - (newSizeKB / originalSizeKB)) * 100);
+                        
+                        originalSize.textContent = `${originalSizeKB} KB`;
+                        optimizedSize.textContent = `${newSizeKB} KB`;
+                        sizeReduction.textContent = `${reduction}%`;
+                        
+                        // Switch to view tab to show result
+                        document.querySelector('.tab[data-tab="view"]').click();
+                    } else {
+                        throw new Error(data.error || 'Failed to optimize image');
+                    }
+                } catch (error) {
+                    alert(`Error: ${error.message}`);
+                } finally {
+                    applyOptimizeBtn.disabled = false;
+                    applyOptimizeBtn.textContent = 'Apply Optimization';
+                }
+            });
+            
             // Generate image
             generateBtn.addEventListener('click', async function() {
                 const prompt = promptInput.value.trim();
                 const width = parseInt(widthInput.value);
                 const height = parseInt(heightInput.value);
-
+                
                 if (!prompt) {
                     showError('Please enter a prompt to generate an image.');
                     return;
                 }
-
+                
                 if (isNaN(width) || isNaN(height) || width < 256 || height < 256) {
                     showError('Dimensions must be at least 256px.');
                     return;
                 }
-
+                
                 // Hide previous results and errors, show loading
                 resultDiv.classList.add('hidden');
                 errorMessage.classList.add('hidden');
                 loadingDiv.classList.remove('hidden');
-
+                
                 // Disable generate button
                 generateBtn.disabled = true;
                 generateBtn.textContent = 'Generating...';
-
+                
                 try {
                     const formData = new FormData();
                     formData.append('prompt', prompt);
                     formData.append('width', width);
                     formData.append('height', height);
                     formData.append('style', selectedStyle);
-
+                    
                     const response = await fetch('/generate', {
                         method: 'POST',
                         body: formData
                     });
-
+                    
                     const data = await response.json();
-
+                    
                     if (data.success) {
+                        // Store the image data
+                        currentImageBase64 = data.image;
+                        
                         // Display the generated image
-                        generatedImage.src = `data:image/jpeg;base64,${data.image}`;
+                        generatedImage.src = `data:image/png;base64,${data.image}`;
                         imageInfo.textContent = `${data.width}×${data.height} • ${selectedStyle.replace('_', ' ')} style`;
-
+                        
+                        // Reset tabs to view
+                        document.querySelector('.tab[data-tab="view"]').click();
+                        
                         // Show result, hide loading
                         loadingDiv.classList.add('hidden');
                         resultDiv.classList.remove('hidden');
-
+                        
                         // Setup download button
                         downloadBtn.onclick = function() {
                             const link = document.createElement('a');
-                            link.href = `data:image/jpeg;base64,${data.image}`;
-                            link.download = `vision-forge-${Date.now()}.jpg`;
+                            link.href = `data:image/png;base64,${data.image}`;
+                            link.download = `vision-forge-${Date.now()}.png`;
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
@@ -290,7 +794,7 @@
                     generateBtn.textContent = 'Generate Image';
                 }
             });
-
+            
             function showError(message) {
                 errorMessage.textContent = message;
                 errorMessage.classList.remove('hidden');
