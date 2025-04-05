@@ -1,137 +1,266 @@
-# Vision Forge - Stable Diffusion Image Generator
+# Vision Forge
 
-This is a Flask-based web application that generates images using the **Stable Diffusion** model. Users can provide a text prompt and select an artistic style to generate highly detailed and professional images. The application also supports custom image dimensions (height and width) as long as they are divisible by 8.
+## Overview
 
-## Table of Contents
-1. [Features](#features)
-2. [Prerequisites](#prerequisites)
-3. [Installation](#installation)
-4. [Usage](#usage)
-5. [API Endpoints](#api-endpoints)
-6. [Notes](#notes)
-7. [Contributing](#contributing)
-8. [License](#license)
+**Vision Forge** is a powerful Flask-based web application designed to generate, inpaint, and optimize images using the Stable Diffusion model. This tool empowers users to create stunning visuals based on textual descriptions, modify specific areas of existing images, and enhance image quality with various styles and optimizations.
 
----
+## Project Repository
+
+You can find the project repository here: [Vision Forge on GitHub](https://github.com/wprashed/visionforge)
 
 ## Features
-- Generate images based on user-provided text prompts and styles.
-- Support for custom image dimensions (height and width must be divisible by 8).
-- Web-based interface for easy interaction.
-- GPU acceleration for faster image generation (if available).
 
----
-
-## Prerequisites
-Before running the application, ensure you have the following installed:
-- Python 3.8 or higher
-- PyTorch (`torch`)
-- Hugging Face `diffusers` library
-- Flask
-- PIL (Pillow)
-- CUDA (optional, for GPU acceleration)
-
-You can install the required dependencies using the following command:
-
-```bash
-pip install torch torchvision diffusers flask pillow
-```
-
-If you plan to use GPU acceleration, ensure you have a compatible NVIDIA GPU with CUDA installed.
-
----
+- **Image Generation**: Create images from textual prompts with support for multiple artistic styles.
+- **Inpainting**: Modify specific regions of an image guided by a mask and prompt.
+- **Image Optimization**: Adjust image quality, format, and dimensions for optimal performance.
+- **Style Presets**: Choose from diverse styles including photorealistic, anime, Ghibli, digital art, and more.
+- **Face Enhancements**: Special optimizations for generating high-quality portraits and faces.
+- **Sample Prompts**: Access categorized sample prompts for quick testing and inspiration.
 
 ## Installation
-1. Clone this repository:
+
+### Prerequisites
+
+- Python 3.8 or higher
+- CUDA-enabled GPU (optional but recommended for faster inference)
+
+### Setup
+
+1. **Clone the Repository**
+
    ```bash
-   git clone https://github.com/yourusername/stable-diffusion-generator.git
-   cd stable-diffusion-generator
+   git clone https://github.com/wprashed/visionforge.git
+   cd visionforge
    ```
 
-2. Install the required dependencies:
+2. **Install Dependencies**
+
+   It's recommended to use a virtual environment:
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+   Install required packages:
+
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Download the Stable Diffusion model:
-   - The model (`runwayml/stable-diffusion-v1-5`) will be downloaded automatically when you run the application for the first time. Ensure you have sufficient disk space (~7GB).
+3. **Download Model Weights**
 
----
+   The script automatically downloads the necessary model weights from Hugging Face. Ensure you have sufficient disk space (~7GB).
 
-## Usage
-1. Start the Flask application:
+4. **Run the Application**
+
    ```bash
    python app.py
    ```
 
-2. Open your browser and navigate to `http://localhost:5000`.
+   The application will be available at [http://localhost:5000](http://localhost:5000).
 
-3. Use the form to input:
-   - **Prompt**: A description of the image you want to generate.
-   - **Style**: An artistic style (e.g., "impressionist", "realistic").
-   - **Height** and **Width**: Custom dimensions for the generated image (must be divisible by 8).
+## Usage
 
-4. Click "Generate Image" to create and view the generated image.
+### Endpoints
 
----
+#### 1. Home Page
 
-## API Endpoints
-### 1. `/`
+- **URL**: `/`
 - **Method**: `GET`
-- **Description**: Renders the main HTML page with the image generation form.
+- **Description**: Renders the main index page.
 
-### 2. `/generate`
+#### 2. Sample Prompts
+
+- **URL**: `/sample_prompts`
+- **Method**: `GET`
+- **Description**: Returns a JSON object containing categorized sample prompts.
+
+**Example Response:**
+
+```json
+{
+    "portraits": [
+        "A portrait of a young woman with long blonde hair and blue eyes",
+        ...
+    ],
+    "landscapes": [
+        "A majestic mountain range at sunset with a lake reflection",
+        ...
+    ],
+    ...
+}
+```
+
+#### 3. Generate Image
+
+- **URL**: `/generate`
 - **Method**: `POST`
-- **Description**: Generates an image based on the provided prompt, style, and dimensions.
-- **Request Body**:
-  ```json
-  {
-      "prompt": "A futuristic cityscape",
-      "style": "cyberpunk",
-      "height": 768,
-      "width": 768
-  }
+- **Parameters**:
+  - `prompt` (required): Textual description for image generation.
+  - `height` (optional, default=512): Image height.
+  - `width` (optional, default=512): Image width.
+  - `style` (optional, default="photorealistic"): Style preset.
+  - `face_enhancement` (optional, default=false): Apply face-specific enhancements.
+
+**Example Request:**
+
+```bash
+curl -X POST http://localhost:5000/generate \
+     -F "prompt=A futuristic cityscape with flying vehicles and neon lights" \
+     -F "height=512" \
+     -F "width=512" \
+     -F "style=sci-fi" \
+     -F "face_enhancement=false"
+```
+
+**Example Response:**
+
+```json
+{
+    "success": true,
+    "image": "base64_encoded_image_string",
+    "height": 512,
+    "width": 512,
+    "style": "sci-fi",
+    "format": "png"
+}
+```
+
+#### 4. Inpaint Image
+
+- **URL**: `/inpaint`
+- **Method**: `POST`
+- **Parameters**:
+  - `original_image` (required): Base64 encoded original image.
+  - `mask` (required): Base64 encoded mask image (white areas will be inpainted).
+  - `prompt` (required): Textual description guiding the inpainting.
+  - `style` (optional, default="photorealistic"): Style preset.
+  - `face_enhancement` (optional, default=false): Apply face-specific enhancements.
+
+**Example Request:**
+
+```bash
+curl -X POST http://localhost:5000/inpaint \
+     -F "original_image=base64_encoded_original_image" \
+     -F "mask=base64_encoded_mask_image" \
+     -F "prompt=Add a magical glowing effect to the selected area" \
+     -F "style=fantasy_art" \
+     -F "face_enhancement=false"
+```
+
+**Example Response:**
+
+```json
+{
+    "success": true,
+    "image": "base64_encoded_inpainted_image_string",
+    "format": "png"
+}
+```
+
+#### 5. Optimize Image
+
+- **URL**: `/optimize`
+- **Method**: `POST`
+- **Parameters**:
+  - `image` (required): Base64 encoded image.
+  - `quality` (optional, default=85): Quality level (1-100) for JPEG compression.
+  - `format` (optional, default="png"): Output format (`png`, `jpeg`, `webp`).
+  - `width` (optional): New width.
+  - `height` (optional): New height.
+
+**Example Request:**
+
+```bash
+curl -X POST http://localhost:5000/optimize \
+     -F "image=base64_encoded_image" \
+     -F "quality=90" \
+     -F "format=jpeg" \
+     -F "width=800" \
+     -F "height=600"
+```
+
+**Example Response:**
+
+```json
+{
+    "success": true,
+    "image": "base64_encoded_optimized_image_string",
+    "format": "jpeg"
+}
+```
+
+## Style Presets
+
+The following style presets are available:
+
+- **Photorealistic**
+- **Anime**
+- **Ghibli**
+- **Digital Art**
+- **Fantasy Art**
+- **Pixel Art**
+- **Abstract Art**
+
+Each style comes with predefined prompt prefixes, suffixes, and negative prompts to guide the image generation process effectively.
+
+## Face Enhancements
+
+When generating portraits or any image that includes faces, enabling `face_enhancement` applies additional optimizations to ensure high-quality facial features, symmetrical proportions, and natural skin textures.
+
+## Sample Prompts
+
+The `/sample_prompts` endpoint provides a categorized list of sample prompts under various themes:
+
+- **Portraits**
+- **Landscapes**
+- **Fantasy**
+- **Sci-Fi**
+- **Animals**
+- **Architecture**
+- **Abstract**
+- **Ghibli Inspired**
+
+Use these prompts as a starting point or for inspiration when creating your own.
+
+## Optimization
+
+Generated images can be optimized for better performance and quality:
+
+- **Quality Adjustment**: Control the compression level for JPEGs.
+- **Format Conversion**: Convert images to different formats like PNG, JPEG, or WebP.
+- **Resizing**: Adjust image dimensions to fit specific requirements.
+
+## Deployment
+
+For production deployment, consider the following:
+
+- **Use a Production Server**: Replace Flask's built-in server with a production-ready server like Gunicorn.
+  
+  ```bash
+  gunicorn -w 4 -b 0.0.0.0:5000 app:app
   ```
-- **Response**:
-  - On success:
-    ```json
-    {
-        "success": true,
-        "image": "base64_encoded_image_string",
-        "height": 768,
-        "width": 768
-    }
-    ```
-  - On failure:
-    ```json
-    {
-        "success": false,
-        "error": "Error message"
-    }
-    ```
 
----
-
-## Notes
-1. **Image Dimensions**: The height and width of the generated image must be divisible by 8. If invalid dimensions are provided, they will be adjusted to the nearest valid values.
-2. **Performance**: Generating large images requires significant computational resources. If you encounter out-of-memory errors, reduce the resolution or use a smaller model.
-3. **GPU Acceleration**: For faster generation, ensure you have a compatible GPU and CUDA installed. The application will automatically use the GPU if available.
-
----
+- **Environment Variables**: Manage sensitive configurations using environment variables.
+- **Containerization**: Dockerize the application for consistent deployment across environments.
 
 ## Contributing
-Contributions are welcome! If you'd like to contribute, please follow these steps:
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Submit a pull request with a clear description of your changes.
 
----
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/YourFeatureName`).
+3. Commit your changes (`git commit -m 'Add some feature'`).
+4. Push to the branch (`git push origin feature/YourFeatureName`).
+5. Open a pull request.
 
 ## License
-This project is licensed under the [MIT License](LICENSE). Feel free to use, modify, and distribute it as per the terms of the license.
 
----
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
-- Thanks to the creators of the [Stable Diffusion](https://huggingface.co/runwayml/stable-diffusion-v1-5) model for making it publicly available.
-- Special thanks to the Hugging Face team for their `diffusers` library, which simplifies working with diffusion models.
+
+- **Stable Diffusion**: Thanks to the researchers and developers behind the Stable Diffusion model.
+- **Hugging Face**: For providing the model weights and the `diffusers` library.
+- **Flask**: For the lightweight web framework.
