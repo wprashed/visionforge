@@ -4,777 +4,1412 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vision Forge - AI Image Generator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary: #10b981;
+            --secondary-hover: #059669;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+            --border: #334155;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #0f172a;
-            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
         }
-        .gradient-bg {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+
+        .container {
+            max-width: 1100px;
+            margin: 20px auto;
+            background-color: var(--bg-card);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
-        .card {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+
+        .input-group {
+            margin-bottom: 20px;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="number"],
+        .input-group select,
+        .input-group textarea,
+        .input-group input[type="range"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-input);
+            color: var(--text);
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
             transition: all 0.3s ease;
         }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            transform: translateY(-2px);
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
         }
-        .btn-secondary {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-        }
-        .btn-secondary:hover {
-            background: rgba(30, 41, 59, 1);
-            transform: translateY(-2px);
-        }
-        .input-field {
-            background-color: rgba(15, 23, 42, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #e2e8f0;
-            transition: all 0.3s ease;
-        }
-        .input-field:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-        }
-        .style-option {
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            color: white;
+            background-color: var(--primary);
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 160px;
+            height: 50px;
         }
-        .style-option:hover {
+
+        .btn:hover {
+            background-color: var(--primary-hover);
             transform: translateY(-2px);
         }
-        .style-option.selected {
-            border-color: #3b82f6;
-            background-color: rgba(59, 130, 246, 0.2);
+
+        .btn:disabled {
+            background-color: #64748b;
+            cursor: not-allowed;
+            transform: none;
         }
-        .loading-spinner {
-            border-top-color: #3b82f6;
+
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+
+        #result {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        #generatedImage {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .aspect-ratio-box {
+
+        #error-message {
+            color: #ef4444;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Tabs Styles */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            border-bottom: 2px solid transparent;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+            margin-bottom: -2px;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: var(--text);
+        }
+
+        .tab.active {
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .style-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .style-option {
+            padding: 10px 18px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .style-option:hover {
+            background-color: var(--border);
+            transform: translateY(-2px);
+        }
+
+        .style-option.selected {
+            background-color: var(--border);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 160px;
+            height: 50px;
+        }
+
+        .download-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            accent-color: var(--primary);
+        }
+
+        .info-text {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .style-card {
+            border: 2px solid transparent;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .style-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .style-card.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        }
+
+        .style-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+        }
+
+        .style-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(15, 23, 42, 0.8);
+            color: var(--text);
+            padding: 10px;
+            text-align: center;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+        }
+
+        .aspect-ratio-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .aspect-ratio-btn {
+            padding: 8px 14px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .aspect-ratio-btn:hover {
+            background-color: var(--border);
+        }
+
+        .aspect-ratio-btn.selected {
+            background-color: var(--border);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .prompt-library {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: var(--bg-input);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .prompt-category {
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .category-title:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .category-title i {
+            margin-right: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .category-title.collapsed i {
+            transform: rotate(-90deg);
+        }
+
+        .prompt-list {
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-left: 10px;
+        }
+
+        .prompt-item {
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            border: 1px solid transparent;
+        }
+
+        .prompt-item:hover {
+            background-color: var(--border);
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .prompt-search {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .prompt-search input {
+            padding-left: 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            height: 50px;
+        }
+
+        .prompt-search i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        /* Custom scrollbar */
+        .prompt-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .prompt-list::-webkit-scrollbar-track {
+            background: var(--bg-input);
+            border-radius: 4px;
+        }
+
+        .prompt-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .prompt-list::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        .collapsed + .prompt-list {
+            display: none;
+        }
+
+        /* Canvas styles */
+        #canvas-container {
+            position: relative;
+            margin: 20px auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        #edit-canvas {
+            background-color: transparent;
+            cursor: crosshair;
+            display: block;
+        }
+
+        .canvas-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .brush-size {
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .brush-size input {
+            width: 150px;
+        }
+
+        .brush-size span {
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .canvas-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Optimize tab styles */
+        .optimize-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .optimize-control {
+            background-color: var(--bg-input);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .optimize-control h3 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .range-with-value {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .range-with-value input[type="range"] {
+            flex-grow: 1;
+        }
+
+        .range-with-value span {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .format-options {
+            display: flex;
+            gap: 10px;
             margin-top: 10px;
         }
-        .aspect-ratio-btn {
-            padding: 5px 10px;
-            background-color: rgba(30, 41, 59, 0.8);
-            border-radius: 5px;
+
+        .format-option {
+            padding: 8px 16px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
-        .aspect-ratio-btn:hover, .aspect-ratio-btn.selected {
-            background-color: #3b82f6;
+
+        .format-option:hover {
+            background-color: var(--border);
         }
-        .tab {
-            cursor: pointer;
-            padding: 10px 20px;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s ease;
+
+        .format-option.selected {
+            background-color: var(--border);
+            border-color: var(--primary);
+            color: var(--primary);
         }
-        .tab.active {
-            border-bottom-color: #3b82f6;
-            color: white;
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .style-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .canvas-controls {
+                flex-direction: column;
+            }
+
+            .optimize-controls {
+                grid-template-columns: 1fr;
+            }
         }
-        .canvas-container {
+
+        /* Tooltip styles */
+        .tooltip {
             position: relative;
-            overflow: hidden;
-            border-radius: 0.5rem;
+            display: inline-block;
         }
-        #edit-canvas {
-            cursor: crosshair;
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #2d3748;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .brush-size-slider {
-            -webkit-appearance: none;
-            height: 6px;
-            border-radius: 3px;
-            background: #1e293b;
-            outline: none;
+
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #2d3748 transparent transparent transparent;
         }
-        .brush-size-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #3b82f6;
-            cursor: pointer;
-        }
-        .brush-size-slider::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #3b82f6;
-            cursor: pointer;
-        }
-        .range-slider {
-            -webkit-appearance: none;
-            height: 6px;
-            border-radius: 3px;
-            background: #1e293b;
-            outline: none;
-        }
-        .range-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #3b82f6;
-            cursor: pointer;
-        }
-        .range-slider::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #3b82f6;
-            cursor: pointer;
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
         }
     </style>
 </head>
-<body class="min-h-screen py-8">
-    <div class="container mx-auto px-4">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl md:text-5xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-600">Vision Forge</h1>
-            <p class="text-lg text-gray-400">Create stunning AI-generated images with unlimited possibilities</p>
-        </header>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold mb-6 text-center">Vision Forge - AI Image Generator</h1>
 
-        <div class="max-w-4xl mx-auto">
-            <div class="card rounded-xl shadow-2xl p-6 md:p-8">
-                <div class="mb-6">
-                    <label for="prompt" class="block text-lg font-medium mb-2">Describe your image</label>
-                    <textarea id="prompt" rows="3" class="input-field w-full rounded-lg p-3 resize-none" placeholder="A majestic mountain landscape with a lake at sunset..."></textarea>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="generate">Generate</button>
+            <button class="tab" data-tab="view">View</button>
+            <button class="tab" data-tab="edit">Edit</button>
+            <button class="tab" data-tab="optimize">Optimize</button>
+            <button class="tab" data-tab="prompt-library">Prompt Library</button>
+        </div>
+
+        <!-- Generate Tab Content -->
+        <div id="generate" class="tab-content active">
+            <div class="mb-6">
+                <label for="prompt" class="block text-lg font-medium mb-3">Prompt</label>
+                <textarea id="prompt" rows="3" class="w-full p-4 border rounded-md" placeholder="Enter a prompt to generate an image"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="width" class="block text-lg font-medium mb-3">Width</label>
+                    <input type="number" id="width" class="w-full p-4 border rounded-md" value="512" min="256" step="8">
+
                 </div>
+                <div>
+                    <label for="height" class="block text-lg font-medium mb-3">Height</label>
+                    <input type="number" id="height" class="w-full p-4 border rounded-md" value="512" min="256" step="8">
+                </div>
+            </div>
 
-                <div class="mb-6">
-                    <label class="block text-lg font-medium mb-3">Choose a style</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                        <div class="style-option rounded-lg p-3 text-center selected" data-style="none">
-                            <div class="bg-gradient-to-br from-gray-700 to-gray-900 h-16 rounded-lg mb-2 flex items-center justify-center">
-                                <span>Standard</span>
-                            </div>
-                            <span class="text-sm">No Style</span>
-                        </div>
-                        <div class="style-option rounded-lg p-3 text-center" data-style="realistic">
-                            <div class="bg-gradient-to-br from-gray-400 to-gray-700 h-16 rounded-lg mb-2"></div>
-                            <span class="text-sm">Realistic</span>
-                        </div>
-                        <div class="style-option rounded-lg p-3 text-center" data-style="digital_art">
-                            <div class="bg-gradient-to-br from-blue-500 to-purple-600 h-16 rounded-lg mb-2"></div>
-                            <span class="text-sm">Digital Art</span>
-                        </div>
-                        <div class="style-option rounded-lg p-3 text-center" data-style="ghibli">
-                            <div class="bg-gradient-to-br from-green-400 to-blue-500 h-16 rounded-lg mb-2"></div>
-                            <span class="text-sm">Ghibli</span>
-                        </div>
-                        <div class="style-option rounded-lg p-3 text-center" data-style="fantasy">
-                            <div class="bg-gradient-to-br from-purple-400 to-pink-600 h-16 rounded-lg mb-2"></div>
-                            <span class="text-sm">Fantasy</span>
-                        </div>
-                        <div class="style-option rounded-lg p-3 text-center" data-style="cyberpunk">
-                            <div class="bg-gradient-to-br from-pink-500 to-yellow-500 h-16 rounded-lg mb-2"></div>
-                            <span class="text-sm">Cyberpunk</span>
-                        </div>
-                        <div class="style-option rounded-lg p-3 text-center" data-style="oil_painting">
-                            <div class="bg-gradient-to-br from-yellow-600 to-red-700 h-16 rounded-lg mb-2"></div>
-                            <span class="text-sm">Oil Painting</span>
-                        </div>
+            <div class="mb-4">
+                <label class="block text-lg font-medium mb-2">Common Aspect Ratios</label>
+                <div class="aspect-ratio-options">
+                    <button type="button" class="aspect-ratio-btn selected" data-width="512" data-height="512">1:1 Square</button>
+                    <button type="button" class="aspect-ratio-btn" data-width="768" data-height="512">3:2 Landscape</button>
+                    <button type="button" class="aspect-ratio-btn" data-width="512" data-height="768">2:3 Portrait</button>
+                    <button type="button" class="aspect-ratio-btn" data-width="768" data-height="432">16:9 Widescreen</button>
+                    <button type="button" class="aspect-ratio-btn" data-width="576" data-height="768">3:4 Portrait</button>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-lg font-medium mb-3">Style</label>
+                <div class="style-grid">
+                    <div class="style-card selected" data-style="photorealistic">
+                        <img src="https://raw.githubusercontent.com/wprashed/visionforge/refs/heads/main/templates/realistic.jpg" class="style-image" alt="Photorealistic style">
+                        <div class="style-label">Realistic</div>
+                    </div>
+                    <div class="style-card" data-style="anime">
+                        <img src="https://raw.githubusercontent.com/wprashed/visionforge/refs/heads/main/templates/anime.jpg" class="style-image" alt="Anime style">
+                        <div class="style-label">Anime</div>
+                    </div>
+                    <div class="style-card" data-style="ghibli">
+                        <img src="https://raw.githubusercontent.com/wprashed/visionforge/refs/heads/main/templates/ghibli.jpg" class="style-image" alt="Ghibli style">
+                        <div class="style-label">Ghibli</div>
+                    </div>
+                    <div class="style-card" data-style="digital_art">
+                        <img src="https://raw.githubusercontent.com/wprashed/visionforge/refs/heads/main/templates/digital.jpg" class="style-image" alt="Digital Art style">
+                        <div class="style-label">Digital Art</div>
+                    </div>
+                    <div class="style-card" data-style="fantasy_art">
+                        <img src="https://raw.githubusercontent.com/wprashed/visionforge/refs/heads/main/templates/fantasy.jpg" class="style-image" alt="Fantasy Art style">
+                        <div class="style-label">Fantasy Art</div>
+                    </div>
+                    <div class="style-card" data-style="pixel_art">
+                        <img src="https://raw.githubusercontent.com/wprashed/visionforge/refs/heads/main/templates/pixel.jpg" class="style-image" alt="Pixel Art style">
+                        <div class="style-label">Pixel Art</div>
+                    </div>
+                    <div class="style-card" data-style="abstract_art">
+                        <img src="https://raw.githubusercontent.com/wprashed/visionforge/refs/heads/main/templates/abstract.jpg" class="style-image" alt="Abstract Art style">
+                        <div class="style-label">Abstract Art</div>
                     </div>
                 </div>
+            </div>
 
-                <div class="mb-6">
-                    <label class="block text-lg font-medium mb-3">Image Dimensions</label>
+            <!-- Face Enhancement Option -->
+            <div class="mb-6">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="face-enhancement" checked>
+                    <label for="face-enhancement" class="text-lg font-medium">Enable Face Enhancement</label>
+                </div>
+                <p class="info-text">Improves facial details, symmetry, and realism when generating human faces or portraits.</p>
+            </div>
+
+            <button id="generateBtn" class="w-full btn">
+                <i class="fas fa-magic"></i> Generate Image
+            </button>
+
+            <!-- Error Message -->
+            <div id="error-message" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- View Tab Content -->
+        <div id="view" class="tab-content">
+            <div id="result" class="hidden">
+                <img id="generatedImage" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/681px-Placeholder_view_vector.svg.png" alt="Generated Image">
+                <p id="imageInfo" class="mt-4 text-gray-400"></p>
+                <div class="flex justify-center gap-4 mt-4">
+                    <a href="#" id="downloadBtn" class="download-btn">
+                        <i class="fas fa-download"></i> Download Image
+                    </a>
+                    <button id="editImageBtn" class="btn btn-outline">
+                        <i class="fas fa-edit"></i> Edit Image
+                    </button>
+                    <button id="optimizeImageBtn" class="btn btn-secondary">
+                        <i class="fas fa-sliders-h"></i> Optimize
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Tab Content -->
+        <div id="edit" class="tab-content">
+            <div class="mb-6">
+                <label for="edit-prompt" class="block text-lg font-medium mb-3">Edit Prompt</label>
+                <textarea id="edit-prompt" rows="3" class="w-full p-4 border rounded-md" placeholder="Describe what you want to change in the selected area"></textarea>
+            </div>
+
+            <div class="canvas-controls">
+                <div class="brush-size">
+                    <label for="brush-size">Brush Size:</label>
+                    <input type="range" id="brush-size" min="5" max="100" value="20">
+                    <span id="brush-size-value">20px</span>
+                </div>
+
+                <div class="canvas-actions">
+                    <button id="clear-canvas" class="btn btn-outline">
+                        <i class="fas fa-eraser"></i> Clear Selection
+                    </button>
+                    <div class="tooltip">
+                        <button id="help-button" class="btn btn-outline">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                        <span class="tooltiptext">Paint over the areas you want to edit. These areas will be regenerated based on your prompt.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="canvas-container">
+                <canvas id="edit-canvas"></canvas>
+            </div>
+
+            <div class="mt-6">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="edit-face-enhancement" checked>
+                    <label for="edit-face-enhancement" class="text-lg font-medium">Enable Face Enhancement</label>
+                </div>
+                <p class="info-text">Improves facial details when editing faces or portraits.</p>
+            </div>
+
+            <button id="apply-edit" class="w-full btn mt-4">
+                <i class="fas fa-paint-brush"></i> Apply Edit
+            </button>
+        </div>
+
+        <!-- Optimize Tab Content -->
+        <div id="optimize" class="tab-content">
+            <div class="optimize-controls">
+                <div class="optimize-control">
+                    <h3>Quality</h3>
+                    <div class="range-with-value">
+                        <input type="range" id="quality-slider" min="1" max="100" value="85">
+                        <span id="quality-value">85%</span>
+                    </div>
+                    <p class="info-text">Higher quality means larger file size.</p>
+                </div>
+
+                <div class="optimize-control">
+                    <h3>Format</h3>
+                    <div class="format-options">
+                        <div class="format-option selected" data-format="png">PNG</div>
+                        <div class="format-option" data-format="jpeg">JPEG</div>
+                        <div class="format-option" data-format="webp">WebP</div>
+                    </div>
+                    <p class="info-text">PNG is lossless but larger. JPEG and WebP are smaller but lossy.</p>
+                </div>
+
+                <div class="optimize-control">
+                    <h3>Dimensions</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label for="width" class="block text-sm font-medium mb-1">Width (px)</label>
-                            <input type="number" id="width" class="input-field w-full rounded-lg p-3" value="512" min="256" step="8">
+                            <label for="optimize-width">Width</label>
+                            <input type="number" id="optimize-width" class="w-full" value="512" min="64" step="8">
                         </div>
                         <div>
-                            <label for="height" class="block text-sm font-medium mb-1">Height (px)</label>
-                            <input type="number" id="height" class="input-field w-full rounded-lg p-3" value="512" min="256" step="8">
+                            <label for="optimize-height">Height</label>
+                            <input type="number" id="optimize-height" class="w-full" value="512" min="64" step="8">
                         </div>
                     </div>
-                    
-                    <div class="mt-3">
-                        <label class="block text-sm font-medium mb-2">Common Aspect Ratios</label>
-                        <div class="flex flex-wrap gap-2">
-                            <button type="button" class="aspect-ratio-btn" data-width="512" data-height="512">1:1 Square</button>
-                            <button type="button" class="aspect-ratio-btn" data-width="768" data-height="512">3:2 Landscape</button>
-                            <button type="button" class="aspect-ratio-btn" data-width="512" data-height="768">2:3 Portrait</button>
-                            <button type="button" class="aspect-ratio-btn" data-width="768" data-height="432">16:9 Widescreen</button>
-                            <button type="button" class="aspect-ratio-btn" data-width="576" data-height="768">3:4 Portrait</button>
-                        </div>
+                    <div class="checkbox-container mt-2">
+                        <input type="checkbox" id="maintain-aspect-ratio" checked>
+                        <label for="maintain-aspect-ratio">Maintain aspect ratio</label>
                     </div>
                 </div>
+            </div>
 
-                <button id="generate-btn" class="btn-primary w-full py-3 px-6 rounded-lg font-medium text-white shadow-lg">
-                    Generate Image
+            <div id="optimize-preview" class="text-center mb-6">
+                <img id="optimized-image" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/681px-Placeholder_view_vector.svg.png" alt="Optimized Image" class="max-w-full mx-auto rounded-lg shadow-lg">
+                <p id="optimize-info" class="mt-2 text-gray-400"></p>
+            </div>
+
+            <div class="flex justify-center gap-4">
+                <button id="apply-optimize" class="btn">
+                    <i class="fas fa-compress-arrows-alt"></i> Apply Optimization
                 </button>
+                <a href="#" id="download-optimized" class="download-btn">
+                    <i class="fas fa-download"></i> Download Optimized
+                </a>
+            </div>
+        </div>
 
-                <div id="error-message" class="mt-4 text-red-500 hidden"></div>
+        <!-- Prompt Library Tab Content -->
+        <div id="prompt-library" class="tab-content">
+            <div class="prompt-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="prompt-search" placeholder="Search prompts..." class="w-full p-4 border rounded-md">
             </div>
 
-            <div id="result" class="mt-8 hidden">
-                <div class="card rounded-xl shadow-2xl p-6 md:p-8">
-                    <h2 class="text-2xl font-bold mb-4">Your Generated Image</h2>
-                    
-                    <!-- Tabs for different editing modes -->
-                    <div class="flex border-b border-gray-700 mb-6">
-                        <div class="tab active" data-tab="view">View</div>
-                        <div class="tab" data-tab="edit">Edit Image</div>
-                        <div class="tab" data-tab="optimize">Optimize</div>
-                    </div>
-                    
-                    <!-- View Tab Content -->
-                    <div id="view-tab" class="tab-content">
-                        <div class="relative">
-                            <img id="generated-image" class="w-full h-auto rounded-lg shadow-lg" src="/placeholder.svg" alt="Generated image">
-                            <div id="download-overlay" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-lg">
-                                <button id="download-btn" class="bg-white text-gray-900 py-2 px-4 rounded-lg font-medium hover:bg-gray-100 transition-colors">
-                                    Download Image
-                                </button>
-                            </div>
-                        </div>
-                        <div class="mt-4 text-sm text-gray-400">
-                            <p id="image-info"></p>
-                        </div>
-                    </div>
-                    
-                    <!-- Edit Tab Content -->
-                    <div id="edit-tab" class="tab-content hidden">
-                        <div class="mb-4">
-                            <label for="edit-prompt" class="block text-sm font-medium mb-2">Describe what to change in the selected area</label>
-                            <textarea id="edit-prompt" rows="2" class="input-field w-full rounded-lg p-3 resize-none" placeholder="Make this area look like a sunset..."></textarea>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2">Brush Size</label>
-                            <input type="range" id="brush-size" class="brush-size-slider w-full" min="5" max="100" value="20">
-                        </div>
-                        
-                        <div class="flex gap-4 mb-4">
-                            <button id="clear-mask-btn" class="btn-secondary py-2 px-4 rounded-lg text-sm">Clear Selection</button>
-                            <button id="apply-edit-btn" class="btn-primary py-2 px-4 rounded-lg text-sm">Apply Changes</button>
-                        </div>
-                        
-                        <div class="canvas-container">
-                            <canvas id="edit-canvas" class="w-full h-auto rounded-lg shadow-lg"></canvas>
-                        </div>
-                        
-                        <div class="mt-4 text-sm text-gray-400">
-                            <p>Paint over the areas you want to change, then describe the changes and click "Apply Changes".</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Optimize Tab Content -->
-                    <div id="optimize-tab" class="tab-content hidden">
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2">Image Format</label>
-                            <div class="flex gap-3">
-                                <label class="flex items-center">
-                                    <input type="radio" name="format" value="jpeg" checked class="mr-2">
-                                    <span>JPEG</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="format" value="png" class="mr-2">
-                                    <span>PNG</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="format" value="webp" class="mr-2">
-                                    <span>WebP</span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2">Quality: <span id="quality-value">85</span>%</label>
-                            <input type="range" id="quality-slider" class="range-slider w-full" min="1" max="100" value="85">
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium mb-2">Resize Image</label>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label for="resize-width" class="block text-xs mb-1">Width (px)</label>
-                                    <input type="number" id="resize-width" class="input-field w-full rounded-lg p-2" placeholder="Original width">
-                                </div>
-                                <div>
-                                    <label for="resize-height" class="block text-xs mb-1">Height (px)</label>
-                                    <input type="number" id="resize-height" class="input-field w-full rounded-lg p-2" placeholder="Original height">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button id="apply-optimize-btn" class="btn-primary w-full py-2 px-4 rounded-lg text-sm">
-                            Apply Optimization
-                        </button>
-                        
-                        <div id="optimize-info" class="mt-4 text-sm text-gray-400 hidden">
-                            <p>Original: <span id="original-size"></span></p>
-                            <p>Optimized: <span id="optimized-size"></span></p>
-                            <p>Reduction: <span id="size-reduction"></span></p>
-                        </div>
-                    </div>
-                </div>
+            <div id="prompt-categories" class="prompt-library">
+                <!-- Categories will be populated by JavaScript -->
             </div>
+        </div>
 
-            <div id="loading" class="mt-8 hidden">
-                <div class="card rounded-xl shadow-2xl p-8 text-center">
-                    <div class="loading-spinner w-12 h-12 border-4 border-blue-200 border-solid rounded-full mx-auto mb-4"></div>
-                    <h2 class="text-xl font-medium">Creating your masterpiece...</h2>
-                    <p class="text-gray-400 mt-2">This may take a minute or two depending on the image size.</p>
-                </div>
-            </div>
+        <!-- Loading Indicator -->
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Creating your image, please wait...</p>
+            <p class="info-text">This may take a minute depending on the complexity and size.</p>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Main elements
-            const generateBtn = document.getElementById('generate-btn');
+            // DOM elements
             const promptInput = document.getElementById('prompt');
             const widthInput = document.getElementById('width');
             const heightInput = document.getElementById('height');
+            const generateBtn = document.getElementById('generateBtn');
             const resultDiv = document.getElementById('result');
+            const generatedImage = document.getElementById('generatedImage');
             const loadingDiv = document.getElementById('loading');
-            const generatedImage = document.getElementById('generated-image');
-            const downloadBtn = document.getElementById('download-btn');
-            const imageInfo = document.getElementById('image-info');
             const errorMessage = document.getElementById('error-message');
-            const styleOptions = document.querySelectorAll('.style-option');
+            const imageInfo = document.getElementById('imageInfo');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const faceEnhancement = document.getElementById('face-enhancement');
             const aspectRatioBtns = document.querySelectorAll('.aspect-ratio-btn');
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            
-            // Edit tab elements
-            const editCanvas = document.getElementById('edit-canvas');
+            const promptSearch = document.getElementById('prompt-search');
+            const promptCategories = document.getElementById('prompt-categories');
+            const editImageBtn = document.getElementById('editImageBtn');
+            const optimizeImageBtn = document.getElementById('optimizeImageBtn');
             const editPrompt = document.getElementById('edit-prompt');
-            const brushSizeSlider = document.getElementById('brush-size');
-            const clearMaskBtn = document.getElementById('clear-mask-btn');
-            const applyEditBtn = document.getElementById('apply-edit-btn');
-            
-            // Optimize tab elements
-            const formatRadios = document.querySelectorAll('input[name="format"]');
+            const editCanvas = document.getElementById('edit-canvas');
+            const brushSize = document.getElementById('brush-size');
+            const brushSizeValue = document.getElementById('brush-size-value');
+            const clearCanvas = document.getElementById('clear-canvas');
+            const applyEdit = document.getElementById('apply-edit');
+            const editFaceEnhancement = document.getElementById('edit-face-enhancement');
             const qualitySlider = document.getElementById('quality-slider');
             const qualityValue = document.getElementById('quality-value');
-            const resizeWidth = document.getElementById('resize-width');
-            const resizeHeight = document.getElementById('resize-height');
-            const applyOptimizeBtn = document.getElementById('apply-optimize-btn');
+            const formatOptions = document.querySelectorAll('.format-option');
+            const optimizeWidth = document.getElementById('optimize-width');
+            const optimizeHeight = document.getElementById('optimize-height');
+            const maintainAspectRatio = document.getElementById('maintain-aspect-ratio');
+            const optimizedImage = document.getElementById('optimized-image');
             const optimizeInfo = document.getElementById('optimize-info');
-            const originalSize = document.getElementById('original-size');
-            const optimizedSize = document.getElementById('optimized-size');
-            const sizeReduction = document.getElementById('size-reduction');
-            
-            // Canvas context and variables
-            let ctx;
+            const applyOptimize = document.getElementById('apply-optimize');
+            const downloadOptimized = document.getElementById('download-optimized');
+
+            // State variables
+            let selectedStyle = 'photorealistic';
+            let currentImageBase64 = null;
+            let samplePrompts = {};
+            let ctx = null;
             let isDrawing = false;
-            let lastX = 0;
-            let lastY = 0;
-            let brushSize = 20;
-            let originalImageData;
-            let currentImageData;
-            let originalImageSize = { width: 0, height: 0 };
-            
-            let selectedStyle = 'none';
-            let currentImageBase64;
-            
+            let currentBrushSize = 20;
+            let selectedFormat = 'png';
+            let optimizedImageBase64 = null;
+            let originalWidth = 512;
+            let originalHeight = 512;
+            let aspectRatio = 1;
+
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Deactivate existing tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+
+                    // Activate current tab
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+
+                    // Initialize canvas when switching to edit tab
+                    if (tab.dataset.tab === 'edit' && currentImageBase64) {
+                        setTimeout(initCanvas, 100);
+                    }
+
+                    // Initialize optimize tab
+                    if (tab.dataset.tab === 'optimize' && currentImageBase64) {
+                        optimizedImage.src = generatedImage.src;
+                        optimizeWidth.value = originalWidth;
+                        optimizeHeight.value = originalHeight;
+                        updateOptimizeInfo();
+                    }
+                });
+            });
+
             // Style selection
-            styleOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    styleOptions.forEach(opt => opt.classList.remove('selected'));
+            const styleCards = document.querySelectorAll('.style-card');
+            styleCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove 'selected' class from all cards
+                    styleCards.forEach(c => c.classList.remove('selected'));
+
+                    // Add 'selected' class to the clicked card
                     this.classList.add('selected');
+
+                    // Update the selected style
                     selectedStyle = this.dataset.style;
                 });
             });
-            
+
             // Aspect ratio buttons
             aspectRatioBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
+                    // Remove 'selected' class from all buttons
                     aspectRatioBtns.forEach(b => b.classList.remove('selected'));
+
+                    // Add 'selected' class to the clicked button
                     this.classList.add('selected');
+
+                    // Update width and height inputs
                     widthInput.value = this.dataset.width;
                     heightInput.value = this.dataset.height;
                 });
             });
-            
-            // Tab switching
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabName = this.dataset.tab;
-                    
-                    // Update active tab
-                    tabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Show corresponding content
-                    tabContents.forEach(content => {
-                        content.classList.add('hidden');
-                    });
-                    document.getElementById(`${tabName}-tab`).classList.remove('hidden');
-                    
-                    // Special handling for edit tab
-                    if (tabName === 'edit' && currentImageBase64) {
-                        setupEditCanvas();
+
+            // Format options
+            formatOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    formatOptions.forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedFormat = this.dataset.format;
+
+                    // Update preview
+                    if (currentImageBase64) {
+                        updateOptimizePreview();
                     }
                 });
             });
-            
+
             // Quality slider
             qualitySlider.addEventListener('input', function() {
-                qualityValue.textContent = this.value;
+                qualityValue.textContent = `${this.value}%`;
+
+                // Update preview with debounce
+                clearTimeout(this.timeout);
+                this.timeout = setTimeout(() => {
+                    if (currentImageBase64) {
+                        updateOptimizePreview();
+                    }
+                }, 300);
             });
-            
-            // Brush size slider
-            brushSizeSlider.addEventListener('input', function() {
-                brushSize = parseInt(this.value);
-            });
-            
-            // Setup canvas for editing
-            function setupEditCanvas() {
-                const img = new Image();
-                img.onload = function() {
-                    // Set canvas dimensions to match image
-                    editCanvas.width = img.width;
-                    editCanvas.height = img.height;
-                    
-                    // Initialize canvas context
-                    ctx = editCanvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    
-                    // Store original image data
-                    originalImageData = ctx.getImageData(0, 0, editCanvas.width, editCanvas.height);
-                    currentImageData = originalImageData;
-                    
-                    // Store original dimensions
-                    originalImageSize.width = img.width;
-                    originalImageSize.height = img.height;
-                    
-                    // Set resize placeholders
-                    resizeWidth.placeholder = img.width;
-                    resizeHeight.placeholder = img.height;
-                };
-                
-                // Remove data URL prefix if present
-                let imgSrc = currentImageBase64;
-                if (!imgSrc.startsWith('data:image')) {
-                    imgSrc = `data:image/png;base64,${imgSrc}`;
+
+            // Maintain aspect ratio
+            optimizeWidth.addEventListener('input', function() {
+                if (maintainAspectRatio.checked) {
+                    optimizeHeight.value = Math.round(this.value / aspectRatio);
                 }
-                
-                img.src = imgSrc;
-                
-                // Setup canvas event listeners
+
+                // Update preview with debounce
+                clearTimeout(this.timeout);
+                this.timeout = setTimeout(() => {
+                    if (currentImageBase64) {
+                        updateOptimizePreview();
+                    }
+                }, 300);
+            });
+
+            optimizeHeight.addEventListener('input', function() {
+                if (maintainAspectRatio.checked) {
+                    optimizeWidth.value = Math.round(this.value * aspectRatio);
+                }
+
+                // Update preview with debounce
+                clearTimeout(this.timeout);
+                this.timeout = setTimeout(() => {
+                    if (currentImageBase64) {
+                        updateOptimizePreview();
+                    }
+                }, 300);
+            });
+
+            // Initialize canvas
+            function initCanvas() {
+                if (!editCanvas) return;
+
+                ctx = editCanvas.getContext('2d');
+
+                // Set canvas size to match the image
+                if (generatedImage.complete) {
+                    resizeCanvas();
+                } else {
+                    generatedImage.onload = resizeCanvas;
+                }
+
+                // Canvas drawing events
                 editCanvas.addEventListener('mousedown', startDrawing);
                 editCanvas.addEventListener('mousemove', draw);
                 editCanvas.addEventListener('mouseup', stopDrawing);
                 editCanvas.addEventListener('mouseout', stopDrawing);
+
+                // Touch events for mobile
                 editCanvas.addEventListener('touchstart', handleTouch);
-                editCanvas.addEventListener('touchmove', handleTouchMove);
+                editCanvas.addEventListener('touchmove', handleTouch);
                 editCanvas.addEventListener('touchend', stopDrawing);
+
+                // Update brush size display
+                brushSize.addEventListener('input', function() {
+                    currentBrushSize = this.value;
+                    brushSizeValue.textContent = `${currentBrushSize}px`;
+                });
+
+                // Clear canvas button
+                clearCanvas.addEventListener('click', function() {
+                    ctx.clearRect(0, 0, editCanvas.width, editCanvas.height);
+                });
             }
-            
-            // Drawing functions
+
+            function resizeCanvas() {
+                const container = document.getElementById('canvas-container');
+                const containerWidth = container.clientWidth;
+
+                // Set canvas dimensions
+                editCanvas.width = containerWidth;
+                editCanvas.height = (containerWidth / generatedImage.naturalWidth) * generatedImage.naturalHeight;
+
+                // Draw the image on the canvas
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0, editCanvas.width, editCanvas.height);
+                    ctx.globalAlpha = 0.5; // Set transparency for the mask
+                };
+                img.src = generatedImage.src;
+
+                // Clear any previous drawings
+                ctx.clearRect(0, 0, editCanvas.width, editCanvas.height);
+            }
+
             function startDrawing(e) {
                 isDrawing = true;
-                [lastX, lastY] = [e.offsetX, e.offsetY];
+                draw(e);
             }
-            
+
             function draw(e) {
                 if (!isDrawing) return;
-                
+
+                // Get mouse position
+                const rect = editCanvas.getBoundingClientRect();
+                let x, y;
+
+                if (e.type.includes('mouse')) {
+                    x = e.clientX - rect.left;
+                    y = e.clientY - rect.top;
+                } else {
+                    // Touch event
+                    x = e.touches[0].clientX - rect.left;
+                    y = e.touches[0].clientY - rect.top;
+                }
+
+                // Draw
+                ctx.fillStyle = 'white';
                 ctx.beginPath();
-                ctx.arc(e.offsetX, e.offsetY, brushSize, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                ctx.arc(x, y, currentBrushSize, 0, Math.PI * 2);
                 ctx.fill();
-                
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(e.offsetX, e.offsetY);
-                ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-                ctx.lineWidth = brushSize * 2;
-                ctx.stroke();
-                
-                [lastX, lastY] = [e.offsetX, e.offsetY];
             }
-            
+
             function stopDrawing() {
                 isDrawing = false;
             }
-            
-            // Touch support for mobile devices
+
             function handleTouch(e) {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const mouseEvent = new MouseEvent('mousedown', {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                });
-                editCanvas.dispatchEvent(mouseEvent);
-            }
-            
-            function handleTouchMove(e) {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const rect = editCanvas.getBoundingClientRect();
-                const scaleX = editCanvas.width / rect.width;
-                const scaleY = editCanvas.height / rect.height;
-                
-                const mouseEvent = new MouseEvent('mousemove', {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY,
-                    offsetX: (touch.clientX - rect.left) * scaleX,
-                    offsetY: (touch.clientY - rect.top) * scaleY
-                });
-                editCanvas.dispatchEvent(mouseEvent);
-            }
-            
-            // Clear mask button
-            clearMaskBtn.addEventListener('click', function() {
-                if (ctx && originalImageData) {
-                    ctx.putImageData(originalImageData, 0, 0);
+                e.preventDefault(); // Prevent scrolling when drawing
+
+                if (e.type === 'touchstart') {
+                    startDrawing(e);
+                } else if (e.type === 'touchmove') {
+                    draw(e);
                 }
+            }
+
+            // Edit image button
+            editImageBtn.addEventListener('click', function() {
+                document.querySelector('.tab[data-tab="edit"]').click();
             });
-            
-            // Apply edit button
-            applyEditBtn.addEventListener('click', async function() {
-                const prompt = editPrompt.value.trim();
-                if (!prompt) {
-                    alert('Please enter a description of what to change.');
+
+            // Optimize image button
+            optimizeImageBtn.addEventListener('click', function() {
+                document.querySelector('.tab[data-tab="optimize"]').click();
+            });
+
+            // Apply edit
+            applyEdit.addEventListener('click', async function() {
+                if (!currentImageBase64 || !editPrompt.value.trim()) {
+                    alert('Please provide an edit prompt');
                     return;
                 }
-                
+
+                // Get the mask from the canvas
+                const maskCanvas = document.createElement('canvas');
+                maskCanvas.width = editCanvas.width;
+                maskCanvas.height = editCanvas.height;
+                const maskCtx = maskCanvas.getContext('2d');
+                maskCtx.drawImage(editCanvas, 0, 0);
+
+                // Convert to base64
+                const maskBase64 = maskCanvas.toDataURL('image/png');
+
                 // Show loading
-                applyEditBtn.disabled = true;
-                applyEditBtn.textContent = 'Processing...';
-                
+                loadingDiv.classList.remove('hidden');
+
                 try {
-                    // Create mask image from canvas
-                    const maskCanvas = document.createElement('canvas');
-                    maskCanvas.width = editCanvas.width;
-                    maskCanvas.height = editCanvas.height;
-                    const maskCtx = maskCanvas.getContext('2d');
-                    
-                    // Extract red channel as mask (where we painted)
-                    const imageData = ctx.getImageData(0, 0, editCanvas.width, editCanvas.height);
-                    const maskData = maskCtx.createImageData(editCanvas.width, editCanvas.height);
-                    
-                    for (let i = 0; i < imageData.data.length; i += 4) {
-                        // If red channel has alpha > 0, it's part of our mask
-                        if (imageData.data[i] === 255 && imageData.data[i + 3] > 0) {
-                            maskData.data[i] = 255;     // R
-                            maskData.data[i + 1] = 255; // G
-                            maskData.data[i + 2] = 255; // B
-                            maskData.data[i + 3] = 255; // A
-                        } else {
-                            maskData.data[i] = 0;       // R
-                            maskData.data[i + 1] = 0;   // G
-                            maskData.data[i + 2] = 0;   // B
-                            maskData.data[i + 3] = 255; // A
-                        }
-                    }
-                    
-                    maskCtx.putImageData(maskData, 0, 0);
-                    
-                    // Convert mask to base64
-                    const maskBase64 = maskCanvas.toDataURL('image/png').split(',')[1];
-                    
-                    // Get original image
-                    let imageBase64 = currentImageBase64;
-                    if (imageBase64.startsWith('data:image')) {
-                        imageBase64 = imageBase64.split(',')[1];
-                    }
-                    
-                    // Send to server for inpainting
                     const formData = new FormData();
-                    formData.append('image', imageBase64);
+                    formData.append('original_image', currentImageBase64);
                     formData.append('mask', maskBase64);
-                    formData.append('prompt', prompt);
+                    formData.append('prompt', editPrompt.value.trim());
                     formData.append('style', selectedStyle);
-                    
+                    formData.append('face_enhancement', editFaceEnhancement.checked ? 'true' : 'false');
+
                     const response = await fetch('/inpaint', {
                         method: 'POST',
                         body: formData
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (data.success) {
                         // Update the image
                         currentImageBase64 = data.image;
-                        
-                        // Update both the view image and the edit canvas
                         generatedImage.src = `data:image/png;base64,${data.image}`;
-                        
-                        // Reset the edit canvas with new image
-                        setupEditCanvas();
-                        
-                        // Switch to view tab to show result
+
+                        // Switch to view tab
                         document.querySelector('.tab[data-tab="view"]').click();
+
+                        // Show result
+                        resultDiv.classList.remove('hidden');
                     } else {
                         throw new Error(data.error || 'Failed to edit image');
                     }
                 } catch (error) {
-                    alert(`Error: ${error.message}`);
+                    console.error('Error editing image:', error);
+                    alert('Error editing image: ' + error.message);
                 } finally {
-                    applyEditBtn.disabled = false;
-                    applyEditBtn.textContent = 'Apply Changes';
+                    // Hide loading
+                    loadingDiv.classList.add('hidden');
                 }
             });
-            
-            // Apply optimization button
-            applyOptimizeBtn.addEventListener('click', async function() {
-                // Get selected format
-                let format = 'jpeg';
-                formatRadios.forEach(radio => {
-                    if (radio.checked) {
-                        format = radio.value;
-                    }
-                });
-                
-                // Get quality
-                const quality = parseInt(qualitySlider.value);
-                
-                // Get resize dimensions
-                const width = resizeWidth.value ? parseInt(resizeWidth.value) : null;
-                const height = resizeHeight.value ? parseInt(resizeHeight.value) : null;
-                
-                // Show loading
-                applyOptimizeBtn.disabled = true;
-                applyOptimizeBtn.textContent = 'Processing...';
-                
+
+            // Update optimize info
+            function updateOptimizeInfo() {
+                if (!optimizedImage.complete) return;
+
+                const width = optimizeWidth.value;
+                const height = optimizeHeight.value;
+                const quality = qualitySlider.value;
+
+                optimizeInfo.textContent = `${width}×${height} • ${selectedFormat.toUpperCase()} • ${quality}% quality`;
+            }
+
+            // Update optimize preview
+            async function updateOptimizePreview() {
                 try {
-                    // Get original image
-                    let imageBase64 = currentImageBase64;
-                    if (imageBase64.startsWith('data:image')) {
-                        imageBase64 = imageBase64.split(',')[1];
-                    }
-                    
-                    // Send to server for optimization
                     const formData = new FormData();
-                    formData.append('image', imageBase64);
-                    formData.append('format', format);
-                    formData.append('quality', quality);
-                    
-                    if (width && height) {
-                        formData.append('resize_width', width);
-                        formData.append('resize_height', height);
-                    }
-                    
+                    formData.append('image', currentImageBase64);
+                    formData.append('quality', qualitySlider.value);
+                    formData.append('format', selectedFormat);
+                    formData.append('width', optimizeWidth.value);
+                    formData.append('height', optimizeHeight.value);
+
                     const response = await fetch('/optimize', {
                         method: 'POST',
                         body: formData
                     });
-                    
+
                     const data = await response.json();
-                    
+
+                    if (data.success) {
+                        // Update the preview image
+                        optimizedImageBase64 = data.image;
+                        optimizedImage.src = `data:image/${data.format};base64,${data.image}`;
+
+                        // Update info
+                        updateOptimizeInfo();
+                    }
+                } catch (error) {
+                    console.error('Error generating preview:', error);
+                }
+            }
+
+            // Apply optimization
+            applyOptimize.addEventListener('click', async function() {
+                if (!currentImageBase64) return;
+
+                try {
+                    const formData = new FormData();
+                    formData.append('image', currentImageBase64);
+                    formData.append('quality', qualitySlider.value);
+                    formData.append('format', selectedFormat);
+                    formData.append('width', optimizeWidth.value);
+                    formData.append('height', optimizeHeight.value);
+
+                    const response = await fetch('/optimize', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
                     if (data.success) {
                         // Update the image
+                        optimizedImageBase64 = data.image;
+                        optimizedImage.src = `data:image/${data.format};base64,${data.image}`;
                         currentImageBase64 = data.image;
-                        
-                        // Update the view image
-                        const mimeType = format === 'jpg' ? 'jpeg' : format;
-                        generatedImage.src = `data:image/${mimeType};base64,${data.image}`;
-                        
-                        // Update image info
-                        imageInfo.textContent = `${data.width}×${data.height} • ${format.toUpperCase()} • ${data.size_kb} KB`;
-                        
-                        // Show optimization info
-                        optimizeInfo.classList.remove('hidden');
-                        
-                        // Calculate size reduction
-                        const originalSizeKB = Math.round(originalImageData.data.length / 1024);
-                        const newSizeKB = data.size_kb;
-                        const reduction = Math.round((1 - (newSizeKB / originalSizeKB)) * 100);
-                        
-                        originalSize.textContent = `${originalSizeKB} KB`;
-                        optimizedSize.textContent = `${newSizeKB} KB`;
-                        sizeReduction.textContent = `${reduction}%`;
-                        
-                        // Switch to view tab to show result
+                        generatedImage.src = `data:image/${data.format};base64,${data.image}`;
+
+                        // Update info
+                        updateOptimizeInfo();
+
+                        // Switch to view tab
                         document.querySelector('.tab[data-tab="view"]').click();
                     } else {
                         throw new Error(data.error || 'Failed to optimize image');
                     }
                 } catch (error) {
-                    alert(`Error: ${error.message}`);
-                } finally {
-                    applyOptimizeBtn.disabled = false;
-                    applyOptimizeBtn.textContent = 'Apply Optimization';
+                    console.error('Error optimizing image:', error);
+                    alert('Error optimizing image: ' + error.message);
                 }
             });
-            
+
+            // Download optimized image
+            downloadOptimized.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                if (!optimizedImageBase64) return;
+
+                const link = document.createElement('a');
+                link.href = `data:image/${selectedFormat};base64,${optimizedImageBase64}`;
+                link.download = `vision-forge-optimized-${Date.now()}.${selectedFormat}`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            // Fetch sample prompts
+            fetch('/sample_prompts')
+                .then(response => response.json())
+                .then(data => {
+                    samplePrompts = data;
+                    populatePromptLibrary(samplePrompts);
+                })
+                .catch(error => console.error('Error fetching sample prompts:', error));
+
+            // Populate prompt library
+            function populatePromptLibrary(prompts) {
+                promptCategories.innerHTML = '';
+
+                Object.keys(prompts).forEach(category => {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'prompt-category';
+
+                    const categoryTitle = document.createElement('div');
+                    categoryTitle.className = 'category-title';
+                    categoryTitle.innerHTML = `<i class="fas fa-chevron-down"></i> ${category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ')} (${prompts[category].length})`;
+                    categoryTitle.addEventListener('click', () => {
+                        categoryTitle.classList.toggle('collapsed');
+                    });
+
+                    const promptList = document.createElement('div');
+                    promptList.className = 'prompt-list';
+
+                    prompts[category].forEach(prompt => {
+                        const promptItem = document.createElement('div');
+                        promptItem.className = 'prompt-item';
+                        promptItem.textContent = prompt;
+                        promptItem.addEventListener('click', () => {
+                            promptInput.value = prompt;
+                            // Switch to generate tab
+                            document.querySelector('.tab[data-tab="generate"]').click();
+                        });
+                        promptList.appendChild(promptItem);
+                    });
+
+                    categoryDiv.appendChild(categoryTitle);
+                    categoryDiv.appendChild(promptList);
+                    promptCategories.appendChild(categoryDiv);
+                });
+            }
+
+            // Search prompts
+            promptSearch.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+
+                if (searchTerm.length < 2) {
+                    populatePromptLibrary(samplePrompts);
+                    return;
+                }
+
+                const filteredPrompts = {};
+
+                Object.keys(samplePrompts).forEach(category => {
+                    const matchingPrompts = samplePrompts[category].filter(prompt =>
+                        prompt.toLowerCase().includes(searchTerm)
+                    );
+
+                    if (matchingPrompts.length > 0) {
+                        filteredPrompts[category] = matchingPrompts;
+                    }
+                });
+
+                populatePromptLibrary(filteredPrompts);
+            });
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('hidden');
+            }
+
             // Generate image
             generateBtn.addEventListener('click', async function() {
                 const prompt = promptInput.value.trim();
                 const width = parseInt(widthInput.value);
                 const height = parseInt(heightInput.value);
-                
+
                 if (!prompt) {
                     showError('Please enter a prompt to generate an image.');
                     return;
                 }
-                
+
                 if (isNaN(width) || isNaN(height) || width < 256 || height < 256) {
                     showError('Dimensions must be at least 256px.');
                     return;
                 }
-                
+
                 // Hide previous results and errors, show loading
                 resultDiv.classList.add('hidden');
                 errorMessage.classList.add('hidden');
                 loadingDiv.classList.remove('hidden');
-                
+
                 // Disable generate button
                 generateBtn.disabled = true;
-                generateBtn.textContent = 'Generating...';
-                
+                generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+
                 try {
                     const formData = new FormData();
                     formData.append('prompt', prompt);
                     formData.append('width', width);
                     formData.append('height', height);
                     formData.append('style', selectedStyle);
-                    
+                    formData.append('face_enhancement', faceEnhancement.checked ? 'true' : 'false');
+
                     const response = await fetch('/generate', {
                         method: 'POST',
                         body: formData
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (data.success) {
                         // Store the image data
                         currentImageBase64 = data.image;
-                        
+                        originalWidth = data.width;
+                        originalHeight = data.height;
+                        aspectRatio = data.width / data.height;
+
+                        // Update optimize tab values
+                        optimizeWidth.value = data.width;
+                        optimizeHeight.value = data.height;
+
                         // Display the generated image
                         generatedImage.src = `data:image/png;base64,${data.image}`;
                         imageInfo.textContent = `${data.width}×${data.height} • ${selectedStyle.replace('_', ' ')} style`;
-                        
+
                         // Reset tabs to view
                         document.querySelector('.tab[data-tab="view"]').click();
-                        
+
                         // Show result, hide loading
                         loadingDiv.classList.add('hidden');
                         resultDiv.classList.remove('hidden');
-                        
+
                         // Setup download button
-                        downloadBtn.onclick = function() {
+                        downloadBtn.onclick = function(e) {
+                            e.preventDefault();
                             const link = document.createElement('a');
                             link.href = `data:image/png;base64,${data.image}`;
                             link.download = `vision-forge-${Date.now()}.png`;
@@ -791,14 +1426,9 @@
                 } finally {
                     // Re-enable generate button
                     generateBtn.disabled = false;
-                    generateBtn.textContent = 'Generate Image';
+                    generateBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Image';
                 }
             });
-            
-            function showError(message) {
-                errorMessage.textContent = message;
-                errorMessage.classList.remove('hidden');
-            }
         });
     </script>
 </body>
