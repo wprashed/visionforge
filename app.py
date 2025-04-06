@@ -1,16 +1,18 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, Response
 import torch
 from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 from PIL import Image
 import io
 import base64
 import gc
-import re
 import random
-import json
 import numpy as np
+import os
+import traceback
 
+# Create Flask app with increased max content length
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024  # 200MB limit
 
 # Check if CUDA is available and set the device accordingly
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -93,14 +95,31 @@ STYLE_PRESETS = {
 
 # Face-specific enhancements
 FACE_ENHANCEMENTS = {
-    "prompt_prefix": "perfect face, symmetrical features, detailed facial features, clear eyes, natural skin texture, ",
-    "prompt_suffix": ", high quality portrait, professional portrait photography, studio lighting",
+    "prompt_prefix": "perfect face, symmetrical features, detailed facial features, clear eyes, natural skin texture, realistic face, high quality face details, ",
+    "prompt_suffix": ", high quality portrait, professional portrait photography, studio lighting, 8k uhd, detailed face",
     "negative_prompt": "deformed face, distorted face, disfigured, mutated, extra limbs, extra fingers, poorly drawn face, bad anatomy, blurry, low quality"
+}
+
+# Full-body enhancements
+FULL_BODY_ENHANCEMENTS = {
+    "prompt_prefix": "full body shot, full figure, standing pose, anatomically correct, ",
+    "prompt_suffix": ", full length portrait, entire body visible, proper proportions, well-proportioned body",
+    "negative_prompt": "cropped, partial body, missing limbs, cut off, zoomed in, close-up"
 }
 
 # Sample prompts organized by categories
 SAMPLE_PROMPTS = {
     "portraits": [
+        "A full-body portrait of a young woman wearing a floral dress, standing in a garden",
+        "A full-body portrait of a man in a suit, standing confidently against a city skyline",
+        "A full-body portrait of a person with tattoos, standing in a forest at sunset",
+        "A full-body portrait of a futuristic soldier in armor, standing ready for battle",
+        "A full-body portrait of a fantasy character with wings, standing in a magical forest",
+        "A full-body portrait of a person with traditional attire, standing in a historical setting",
+        "A full-body portrait of a person with glowing eyes, standing in a dark room",
+        "A full-body portrait of a person with a galaxy reflected in their eyes, standing in space",
+        "A full-body portrait of a person with an elaborate headdress, standing in a ceremonial hall",
+        "A full-body portrait of a person with tears of gold, standing in a mystical landscape",
         "A portrait of a young woman with long blonde hair and blue eyes",
         "A close-up portrait of an elderly man with weathered skin and wise eyes",
         "A side profile of a woman with a flower crown and freckles",
@@ -245,22 +264,33 @@ def contains_face_keywords(prompt):
         'face', 'portrait', 'person', 'woman', 'man', 'girl', 'boy', 'human',
         'people', 'selfie', 'headshot', 'profile'
     ]
-
+    if prompt is None:
+        return False
     prompt_lower = prompt.lower()
     return any(keyword in prompt_lower for keyword in face_keywords)
 
 
-def generate_image(prompt, height=512, width=512, style='photorealistic', face_enhancement=False):
+def contains_full_body_keywords(prompt):
+    """Check if the prompt likely contains a request for a full body image"""
+    full_body_keywords = [
+        'full body', 'full-body', 'standing', 'full figure', 'full length', 'head to toe',
+        'entire body', 'whole body', 'full shot', 'full portrait'
+    ]
+    if prompt is None:
+        return False
+    prompt_lower = prompt.lower()
+    return any(keyword in prompt_lower for keyword in full_body_keywords)
+
+
+def generate_image(prompt, height=1024, width=768, style='photorealistic', face_enhancement=False):
     """
     Generates an image based on the given prompt and style using Stable Diffusion.
-
     Args:
         prompt (str): The prompt to guide the image generation.
         height (int): The height of the generated image.
         width (int): The width of the generated image.
         style (str): The style preset to use.
         face_enhancement (bool): Whether to apply face-specific enhancements.
-
     Returns:
         PIL.Image.Image: The generated image.
     """
@@ -272,7 +302,19 @@ def generate_image(prompt, height=512, width=512, style='photorealistic', face_e
 
     # Prepare the prompt
     final_prompt = f"{style_preset['prompt_prefix']}{prompt}{style_preset['prompt_suffix']}"
-    negative_prompt = style_preset["negative_prompt"]
+    negative_prompt = style_preset['negative_prompt']
+
+    # Check if this is a full body request
+    is_full_body = contains_full_body_keywords(prompt)
+
+    # Apply full body enhancements if needed
+    if is_full_body:
+        final_prompt = f"{FULL_BODY_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FULL_BODY_ENHANCEMENTS['prompt_suffix']}"
+        negative_prompt = f"{negative_prompt}, {FULL_BODY_ENHANCEMENTS['negative_prompt']}"
+
+        # For full body shots, use a wider aspect ratio
+        if height > width * 1.5:  # If too tall and narrow
+            height = int(width * 1.5)  # Use 3:2 aspect ratio for full body
 
     # Apply face enhancements if requested or if the prompt contains face-related keywords
     if face_enhancement or contains_face_keywords(prompt):
@@ -280,14 +322,12 @@ def generate_image(prompt, height=512, width=512, style='photorealistic', face_e
         negative_prompt = f"{negative_prompt}, {FACE_ENHANCEMENTS['negative_prompt']}"
 
     # Set inference parameters
-    inference_steps = 40 if face_enhancement or contains_face_keywords(prompt) else 30
-    guidance_scale = 8.0 if face_enhancement or contains_face_keywords(prompt) else 7.5
+    inference_steps = 30
+    guidance_scale = 7.5
 
-    # Set a seed for more consistent face generation if needed
-    generator = None
-    if face_enhancement or contains_face_keywords(prompt):
-        seed = random.randint(1, 2147483647)
-        generator = torch.Generator(device=device).manual_seed(seed)
+    # Set a seed for more consistent generation
+    seed = random.randint(1, 2147483647)
+    generator = torch.Generator(device=device).manual_seed(seed)
 
     # Ensure dimensions are multiples of 8
     height = (height // 8) * 8
@@ -302,7 +342,8 @@ def generate_image(prompt, height=512, width=512, style='photorealistic', face_e
             negative_prompt=negative_prompt,
             num_inference_steps=inference_steps,
             guidance_scale=guidance_scale,
-            generator=generator
+            generator=generator,
+            num_images_per_prompt=1
         ).images[0]
 
     # Clean up CUDA memory
@@ -313,131 +354,212 @@ def generate_image(prompt, height=512, width=512, style='photorealistic', face_e
     return image
 
 
-# Fix the inpaint_image function to properly handle base64 images
 def inpaint_image(original_image_base64, mask_base64, prompt, style='photorealistic', face_enhancement=False):
     """
     Inpaints an image based on the given mask and prompt.
-
     Args:
         original_image_base64 (str): Base64 encoded original image
         mask_base64 (str): Base64 encoded mask image (white areas will be inpainted)
         prompt (str): The prompt to guide the inpainting
         style (str): The style preset to use
         face_enhancement (bool): Whether to apply face-specific enhancements
-
     Returns:
         PIL.Image.Image: The inpainted image
     """
     if pipe is None:
         raise Exception("Stable Diffusion pipeline not loaded.")
 
-    # Decode base64 images - handle both with and without data URL prefix
-    if ',' in original_image_base64:
-        original_image_base64 = original_image_base64.split(',')[1]
-    if ',' in mask_base64:
-        mask_base64 = mask_base64.split(',')[1]
+    try:
+        # Decode base64 images - handle both with and without data URL prefix
+        if ',' in original_image_base64:
+            original_image_base64 = original_image_base64.split(',')[1]
+        if ',' in mask_base64:
+            mask_base64 = mask_base64.split(',')[1]
 
-    original_image_data = base64.b64decode(original_image_base64)
-    mask_data = base64.b64decode(mask_base64)
+        original_image_data = base64.b64decode(original_image_base64)
+        mask_data = base64.b64decode(mask_base64)
 
-    original_image = Image.open(io.BytesIO(original_image_data))
-    mask_image = Image.open(io.BytesIO(mask_data)).convert("RGB")
+        original_image = Image.open(io.BytesIO(original_image_data))
+        mask_image = Image.open(io.BytesIO(mask_data)).convert("RGB")
 
-    # Convert mask to black and white (white areas will be inpainted)
-    mask_image = mask_image.convert("L")
+        # Convert mask to black and white (white areas will be inpainted)
+        mask_image = mask_image.convert("L")
 
-    # Get the style preset
-    style_preset = STYLE_PRESETS.get(style.lower(), STYLE_PRESETS["photorealistic"])
+        # Get the style preset
+        style_preset = STYLE_PRESETS.get(style.lower(), STYLE_PRESETS["photorealistic"])
 
-    # Prepare the prompt
-    final_prompt = f"{style_preset['prompt_prefix']}{prompt}{style_preset['prompt_suffix']}"
-    negative_prompt = style_preset["negative_prompt"]
+        # Prepare the prompt
+        final_prompt = f"{style_preset['prompt_prefix']}{prompt}{style_preset['prompt_suffix']}"
+        negative_prompt = style_preset['negative_prompt']
 
-    # Apply face enhancements if requested or if the prompt contains face-related keywords
-    if face_enhancement or contains_face_keywords(prompt):
-        final_prompt = f"{FACE_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FACE_ENHANCEMENTS['prompt_suffix']}"
-        negative_prompt = f"{negative_prompt}, {FACE_ENHANCEMENTS['negative_prompt']}"
+        # Check if this is a full body request
+        is_full_body = contains_full_body_keywords(prompt)
 
-    # Set inference parameters
-    inference_steps = 40 if face_enhancement or contains_face_keywords(prompt) else 30
-    guidance_scale = 8.0 if face_enhancement or contains_face_keywords(prompt) else 7.5
+        # Apply full body enhancements if needed
+        if is_full_body:
+            final_prompt = f"{FULL_BODY_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FULL_BODY_ENHANCEMENTS['prompt_suffix']}"
+            negative_prompt = f"{negative_prompt}, {FULL_BODY_ENHANCEMENTS['negative_prompt']}"
 
-    # Ensure dimensions are multiples of 8
-    width, height = original_image.size
-    width = (width // 8) * 8
-    height = (height // 8) * 8
-    original_image = original_image.resize((width, height))
-    mask_image = mask_image.resize((width, height))
+        # Apply face enhancements if requested or if the prompt contains face-related keywords
+        if face_enhancement or contains_face_keywords(prompt):
+            final_prompt = f"{FACE_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FACE_ENHANCEMENTS['prompt_suffix']}"
+            negative_prompt = f"{negative_prompt}, {FACE_ENHANCEMENTS['negative_prompt']}"
 
-    # Generate the inpainted image
-    with torch.no_grad():
-        image = pipe(
-            prompt=final_prompt,
-            image=original_image,
-            mask_image=mask_image,
-            negative_prompt=negative_prompt,
-            num_inference_steps=inference_steps,
-            guidance_scale=guidance_scale,
-        ).images[0]
+        # Set inference parameters
+        inference_steps = 30
+        guidance_scale = 7.5
 
-    # Clean up CUDA memory
-    if device == "cuda":
-        torch.cuda.empty_cache()
-    gc.collect()
+        # Set a seed for more consistent generation
+        seed = random.randint(1, 2147483647)
+        generator = torch.Generator(device=device).manual_seed(seed)
 
-    return image
+        # Ensure dimensions are multiples of 8
+        width, height = original_image.size
+        width = (width // 8) * 8
+        height = (height // 8) * 8
+        original_image = original_image.resize((width, height))
+        mask_image = mask_image.resize((width, height))
+
+        # Generate the inpainted image
+        with torch.no_grad():
+            image = pipe(
+                prompt=final_prompt,
+                image=original_image,
+                mask_image=mask_image,
+                negative_prompt=negative_prompt,
+                num_inference_steps=inference_steps,
+                guidance_scale=guidance_scale,
+                generator=generator,
+                num_images_per_prompt=1
+            ).images[0]
+
+        # Clean up CUDA memory
+        if device == "cuda":
+            torch.cuda.empty_cache()
+        gc.collect()
+
+        return image
+    except Exception as e:
+        print(f"Error in inpaint_image: {e}")
+        print(traceback.format_exc())
+        raise
 
 
-# Fix the optimize_image function to handle data URL prefixes
+def compress_image_base64(image_base64, max_size_kb=5000):
+    """
+    Compresses an image to reduce its size while maintaining quality.
+    Args:
+        image_base64 (str): Base64 encoded image
+        max_size_kb (int): Maximum size in KB
+    Returns:
+        str: Base64 encoded compressed image
+    """
+    try:
+        # Handle data URL prefix if present
+        prefix = ""
+        if ',' in image_base64:
+            prefix, image_base64 = image_base64.split(',', 1)
+            prefix += ','
+
+        # Decode base64 image
+        image_data = base64.b64decode(image_base64)
+        image = Image.open(io.BytesIO(image_data))
+
+        # Initial quality
+        quality = 95
+        max_size_bytes = max_size_kb * 1024
+
+        # Try to compress the image
+        while quality > 30:  # Don't go below quality 30
+            buffered = io.BytesIO()
+
+            # Convert to RGB if needed
+            if image.mode == "RGBA":
+                image = image.convert("RGB")
+
+            # Save with compression
+            image.save(buffered, format="JPEG", quality=quality, optimize=True)
+
+            # Check size
+            if buffered.tell() <= max_size_bytes:
+                break
+
+            # Reduce quality and try again
+            quality -= 10
+
+        # If still too large, resize the image
+        if buffered.tell() > max_size_bytes:
+            # Calculate new dimensions to reduce size
+            width, height = image.size
+            ratio = (max_size_bytes / buffered.tell()) ** 0.5  # Square root to apply to both dimensions
+            new_width = int(width * ratio)
+            new_height = int(height * ratio)
+
+            # Resize and compress again
+            image = image.resize((new_width, new_height), Image.LANCZOS)
+            buffered = io.BytesIO()
+            image.save(buffered, format="JPEG", quality=quality, optimize=True)
+
+        # Get base64 encoded result
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        return prefix + img_str
+    except Exception as e:
+        print(f"Error in compress_image_base64: {e}")
+        print(traceback.format_exc())
+        # Return original if compression fails
+        return image_base64
+
+
 def optimize_image(image_base64, quality=85, format="png", width=None, height=None):
     """
     Optimizes an image by adjusting quality, format, and dimensions.
-
     Args:
         image_base64 (str): Base64 encoded image
         quality (int): Quality level (1-100) for JPEG compression
         format (str): Output format (png, jpeg, webp)
         width (int, optional): New width
         height (int, optional): New height
-
     Returns:
         str: Base64 encoded optimized image
     """
-    # Handle data URL prefix if present
-    if ',' in image_base64:
-        image_base64 = image_base64.split(',')[1]
+    try:
+        # Handle data URL prefix if present
+        if ',' in image_base64:
+            image_base64 = image_base64.split(',')[1]
 
-    # Decode base64 image
-    image_data = base64.b64decode(image_base64)
-    image = Image.open(io.BytesIO(image_data))
+        # Decode base64 image
+        image_data = base64.b64decode(image_base64)
+        image = Image.open(io.BytesIO(image_data))
 
-    # Resize if dimensions provided
-    if width and height:
-        width = int(width)
-        height = int(height)
-        image = image.resize((width, height), Image.LANCZOS)
+        # Resize if dimensions provided
+        if width and height:
+            width = int(width)
+            height = int(height)
+            image = image.resize((width, height), Image.LANCZOS)
 
-    # Convert to RGB if saving as JPEG
-    if format.lower() == "jpeg" and image.mode == "RGBA":
-        image = image.convert("RGB")
+        # Convert to RGB if saving as JPEG
+        if format.lower() == "jpeg" and image.mode == "RGBA":
+            image = image.convert("RGB")
 
-    # Save with optimization
-    buffered = io.BytesIO()
+        # Save with optimization
+        buffered = io.BytesIO()
+        if format.lower() == "png":
+            image.save(buffered, format="PNG", optimize=True)
+        elif format.lower() == "jpeg":
+            image.save(buffered, format="JPEG", quality=quality, optimize=True)
+        elif format.lower() == "webp":
+            image.save(buffered, format="WEBP", quality=quality)
+        else:
+            # Default to PNG
+            image.save(buffered, format="PNG", optimize=True)
 
-    if format.lower() == "png":
-        image.save(buffered, format="PNG", optimize=True)
-    elif format.lower() == "jpeg":
-        image.save(buffered, format="JPEG", quality=quality, optimize=True)
-    elif format.lower() == "webp":
-        image.save(buffered, format="WEBP", quality=quality)
-    else:
-        # Default to PNG
-        image.save(buffered, format="PNG", optimize=True)
-
-    # Get base64 encoded result
-    img_str = base64.b64encode(buffered.getvalue()).decode()
-
-    return img_str
+        # Get base64 encoded result
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        return img_str
+    except Exception as e:
+        print(f"Error in optimize_image: {e}")
+        print(traceback.format_exc())
+        raise
 
 
 @app.route('/')
@@ -460,15 +582,12 @@ def generate_image_route():
 
         # Get dimensions with defaults
         try:
-            height = int(request.form.get('height', 512))
-            width = int(request.form.get('width', 512))
+            height = int(request.form.get('height', 1024))
+            width = int(request.form.get('width', 768))
         except ValueError:
             raise ValueError("Invalid dimensions provided")
 
-        # Get style preset
         style = request.form.get('style', 'photorealistic')
-
-        # Check for face enhancement
         face_enhancement = request.form.get('face_enhancement', 'false').lower() == 'true'
 
         # Generate image
@@ -487,19 +606,19 @@ def generate_image_route():
             'style': style,
             'format': 'png'
         })
-
     except ValueError as ve:
+        print(f"ValueError in generate_image_route: {ve}")
         return jsonify({
             'success': False,
             'error': str(ve)
         }), 400
-
     except Exception as e:
+        print(f"Exception in generate_image_route: {e}")
+        print(traceback.format_exc())
         return jsonify({
             'success': False,
             'error': str(e)
         }), 500
-
     finally:
         # Cleanup
         if device == "cuda":
@@ -520,6 +639,10 @@ def inpaint_image_route():
         if not original_image or not mask or not prompt:
             raise ValueError("Original image, mask, and prompt are required")
 
+        # Compress images if they're too large
+        original_image = compress_image_base64(original_image)
+        mask = compress_image_base64(mask)
+
         # Inpaint image
         img = inpaint_image(original_image, mask, prompt, style, face_enhancement)
 
@@ -533,19 +656,19 @@ def inpaint_image_route():
             'image': img_str,
             'format': 'png'
         })
-
     except ValueError as ve:
+        print(f"ValueError in inpaint_image_route: {ve}")
         return jsonify({
             'success': False,
             'error': str(ve)
         }), 400
-
     except Exception as e:
+        print(f"Exception in inpaint_image_route: {e}")
+        print(traceback.format_exc())
         return jsonify({
             'success': False,
             'error': str(e)
         }), 500
-
     finally:
         # Cleanup
         if device == "cuda":
@@ -571,6 +694,9 @@ def optimize_image_route():
         if not image:
             raise ValueError("Image is required")
 
+        # Compress image if it's too large
+        image = compress_image_base64(image)
+
         # Optimize image
         optimized_image = optimize_image(image, quality, format, width, height)
 
@@ -579,14 +705,15 @@ def optimize_image_route():
             'image': optimized_image,
             'format': format
         })
-
     except ValueError as ve:
+        print(f"ValueError in optimize_image_route: {ve}")
         return jsonify({
             'success': False,
             'error': str(ve)
         }), 400
-
     except Exception as e:
+        print(f"Exception in optimize_image_route: {e}")
+        print(traceback.format_exc())
         return jsonify({
             'success': False,
             'error': str(e)
@@ -594,4 +721,12 @@ def optimize_image_route():
 
 
 if __name__ == '__main__':
+    # Increase the maximum request size for Werkzeug
+    from werkzeug.serving import WSGIRequestHandler
+
+    WSGIRequestHandler.protocol_version = "HTTP/1.1"
+
+    # Set environment variable to increase max request size
+    os.environ['WERKZEUG_SERVER_MAX_CONTENT_LENGTH'] = str(200 * 1024 * 1024)  # 200MB
+
     app.run(debug=True)
