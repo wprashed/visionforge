@@ -19,6 +19,7 @@ app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB limit
 
 # Set the maximum request body size for Werkzeug
 from werkzeug.middleware.proxy_fix import ProxyFix
+
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
 # Check if CUDA is available and set the device accordingly
@@ -276,6 +277,7 @@ SAMPLE_PROMPTS = {
     ]
 }
 
+
 def contains_face_keywords(prompt):
     """Check if the prompt likely contains a request for a face or portrait"""
     face_keywords = [
@@ -287,6 +289,7 @@ def contains_face_keywords(prompt):
     prompt_lower = prompt.lower()
     return any(keyword in prompt_lower for keyword in face_keywords)
 
+
 def contains_full_body_keywords(prompt):
     """Check if the prompt likely contains a request for a full body image"""
     full_body_keywords = [
@@ -296,7 +299,8 @@ def contains_full_body_keywords(prompt):
     if prompt is None:
         return False
     prompt_lower = prompt.lower()
-    return any(keyword in prompt_lower for keyword in face_keywords)
+    return any(keyword in prompt_lower for keyword in full_body_keywords)
+
 
 def generate_image(prompt, height=1024, width=768, style='photorealistic', face_enhancement=False):
     """
@@ -319,27 +323,27 @@ def generate_image(prompt, height=1024, width=768, style='photorealistic', face_
     # Check if the prompt contains human/face-related terms
     has_face_terms = contains_face_keywords(prompt)
     has_full_body_terms = contains_full_body_keywords(prompt)
-    
+
     # Prepare the prompt
     final_prompt = f"{style_preset['prompt_prefix']}{prompt}{style_preset['prompt_suffix']}"
-    
+
     # Prepare negative prompt - avoid low quality by default
     negative_prompt = style_preset['negative_prompt']
-    
+
     # Only apply face enhancements if explicitly requested by checkbox OR prompt contains face terms
     if (face_enhancement and has_face_terms) or (style == 'photorealistic' and has_face_terms):
         final_prompt = f"{FACE_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FACE_ENHANCEMENTS['prompt_suffix']}"
         # Use face enhancement negative prompt if provided
         if FACE_ENHANCEMENTS['negative_prompt']:
             negative_prompt = FACE_ENHANCEMENTS['negative_prompt']
-    
+
     # Only apply full body enhancements if explicitly requested in the prompt
     if has_full_body_terms:
         final_prompt = f"{FULL_BODY_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FULL_BODY_ENHANCEMENTS['prompt_suffix']}"
         # Use full body enhancement negative prompt if provided
         if FULL_BODY_ENHANCEMENTS['negative_prompt']:
             negative_prompt = FULL_BODY_ENHANCEMENTS['negative_prompt']
-        
+
         # For full body shots, use a wider aspect ratio
         if height > width * 1.5:  # If too tall and narrow
             height = int(width * 1.5)  # Use 3:2 aspect ratio for full body
@@ -380,6 +384,7 @@ def generate_image(prompt, height=1024, width=768, style='photorealistic', face_
 
     return image
 
+
 def inpaint_image(original_image_base64, mask_base64, prompt, style='photorealistic', face_enhancement=False):
     """
     Inpaints an image based on the given mask and prompt.
@@ -404,7 +409,7 @@ def inpaint_image(original_image_base64, mask_base64, prompt, style='photorealis
 
         original_image_data = base64.b64decode(original_image_base64)
         mask_data = base64.b64decode(mask_base64)
-        
+
         original_image = Image.open(io.BytesIO(original_image_data))
         mask_image = Image.open(io.BytesIO(mask_data)).convert("RGB")
 
@@ -417,20 +422,20 @@ def inpaint_image(original_image_base64, mask_base64, prompt, style='photorealis
         # Check if the prompt contains human/face-related terms
         has_face_terms = contains_face_keywords(prompt)
         has_full_body_terms = contains_full_body_keywords(prompt)
-        
+
         # Prepare the prompt
         final_prompt = f"{style_preset['prompt_prefix']}{prompt}{style_preset['prompt_suffix']}"
-        
+
         # Prepare negative prompt - avoid low quality by default
         negative_prompt = style_preset['negative_prompt']
-        
+
         # Only apply face enhancements if explicitly requested by checkbox OR prompt contains face terms
         if (face_enhancement and has_face_terms) or (style == 'photorealistic' and has_face_terms):
             final_prompt = f"{FACE_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FACE_ENHANCEMENTS['prompt_suffix']}"
             # Use face enhancement negative prompt if provided
             if FACE_ENHANCEMENTS['negative_prompt']:
                 negative_prompt = FACE_ENHANCEMENTS['negative_prompt']
-        
+
         # Only apply full body enhancements if explicitly requested in the prompt
         if has_full_body_terms:
             final_prompt = f"{FULL_BODY_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FULL_BODY_ENHANCEMENTS['prompt_suffix']}"
@@ -481,6 +486,7 @@ def inpaint_image(original_image_base64, mask_base64, prompt, style='photorealis
         print(traceback.format_exc())
         raise
 
+
 def compress_image_base64(image_base64, max_size_kb=1000):
     """
     Compresses an image to reduce its size while maintaining quality.
@@ -500,15 +506,15 @@ def compress_image_base64(image_base64, max_size_kb=1000):
         # Decode base64 image
         image_data = base64.b64decode(image_base64)
         image = Image.open(io.BytesIO(image_data))
-        
+
         # Initial quality and size
         quality = 85
         max_size_bytes = max_size_kb * 1024
-        
+
         # First, resize large images immediately
         width, height = image.size
         max_dimension = 1600  # Limit maximum dimension
-        
+
         if width > max_dimension or height > max_dimension:
             if width > height:
                 new_width = max_dimension
@@ -516,27 +522,27 @@ def compress_image_base64(image_base64, max_size_kb=1000):
             else:
                 new_height = max_dimension
                 new_width = int(width * (max_dimension / height))
-            
+
             image = image.resize((new_width, new_height), Image.LANCZOS)
-        
+
         # Try to compress the image
         while quality > 20:  # Lower minimum quality to 20
             buffered = io.BytesIO()
-            
+
             # Convert to RGB if needed
             if image.mode == "RGBA":
                 image = image.convert("RGB")
-                
+
             # Save with compression
             image.save(buffered, format="JPEG", quality=quality, optimize=True)
-            
+
             # Check size
             if buffered.tell() <= max_size_bytes:
                 break
-                
+
             # Reduce quality and try again
             quality -= 15  # More aggressive quality reduction
-            
+
         # If still too large, resize the image
         if buffered.tell() > max_size_bytes:
             # Calculate new dimensions to reduce size
@@ -544,12 +550,12 @@ def compress_image_base64(image_base64, max_size_kb=1000):
             ratio = (max_size_bytes / buffered.tell()) ** 0.5  # Square root to apply to both dimensions
             new_width = int(width * ratio)
             new_height = int(height * ratio)
-            
+
             # Resize and compress again
             image = image.resize((new_width, new_height), Image.LANCZOS)
             buffered = io.BytesIO()
             image.save(buffered, format="JPEG", quality=quality, optimize=True)
-        
+
         # Get base64 encoded result
         img_str = base64.b64encode(buffered.getvalue()).decode()
         return prefix + img_str
@@ -558,6 +564,7 @@ def compress_image_base64(image_base64, max_size_kb=1000):
         print(traceback.format_exc())
         # Return original if compression fails
         return image_base64
+
 
 def optimize_image(image_base64, quality=85, format="png", width=None, height=None):
     """
@@ -610,6 +617,7 @@ def optimize_image(image_base64, quality=85, format="png", width=None, height=No
         print(traceback.format_exc())
         raise
 
+
 def save_training_image(image_base64, name, category=None):
     """
     Saves an image for training purposes.
@@ -628,29 +636,29 @@ def save_training_image(image_base64, name, category=None):
         # Decode base64 image
         image_data = base64.b64decode(image_base64)
         image = Image.open(io.BytesIO(image_data))
-        
+
         # Generate a unique filename
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         filename = f"{name.replace(' ', '_')}_{timestamp}.png"
         filepath = os.path.join(IMAGES_DIR, filename)
-        
+
         # Save the image
         image.save(filepath, format="PNG")
-        
+
         # Update metadata
         with open(METADATA_FILE, 'r') as f:
             metadata = json.load(f)
-        
+
         metadata["images"][filename] = {
             "name": name,
             "category": category,
             "timestamp": timestamp,
             "path": filepath
         }
-        
+
         with open(METADATA_FILE, 'w') as f:
             json.dump(metadata, f, indent=2)
-        
+
         return {
             "filename": filename,
             "name": name,
@@ -661,6 +669,7 @@ def save_training_image(image_base64, name, category=None):
         print(f"Error in save_training_image: {e}")
         print(traceback.format_exc())
         raise
+
 
 def get_training_data():
     """
@@ -677,6 +686,7 @@ def get_training_data():
         print(traceback.format_exc())
         return {"images": {}}
 
+
 def delete_training_image(filename):
     """
     Deletes a training image.
@@ -689,38 +699,41 @@ def delete_training_image(filename):
         # Get metadata
         with open(METADATA_FILE, 'r') as f:
             metadata = json.load(f)
-        
+
         # Check if file exists in metadata
         if filename not in metadata["images"]:
             return False
-        
+
         # Get file path
         filepath = metadata["images"][filename]["path"]
-        
+
         # Delete file if it exists
         if os.path.exists(filepath):
             os.remove(filepath)
-        
+
         # Remove from metadata
         del metadata["images"][filename]
-        
+
         # Save updated metadata
         with open(METADATA_FILE, 'w') as f:
             json.dump(metadata, f, indent=2)
-        
+
         return True
     except Exception as e:
         print(f"Error in delete_training_image: {e}")
         print(traceback.format_exc())
         return False
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
+
 @app.route('/sample_prompts')
 def sample_prompts():
     return jsonify(SAMPLE_PROMPTS)
+
 
 @app.route('/generate', methods=['POST'])
 def generate_image_route():
@@ -775,6 +788,7 @@ def generate_image_route():
             torch.cuda.empty_cache()
         gc.collect()
 
+
 @app.route('/inpaint', methods=['POST'])
 def inpaint_image_route():
     try:
@@ -824,6 +838,7 @@ def inpaint_image_route():
             torch.cuda.empty_cache()
         gc.collect()
 
+
 @app.route('/optimize', methods=['POST'])
 def optimize_image_route():
     try:
@@ -831,23 +846,23 @@ def optimize_image_route():
         image = request.form.get('image')
         quality = int(request.form.get('quality', 85))
         format = request.form.get('format', 'png')
-        
+
         # Get dimensions if provided
         width = None
         height = None
         if request.form.get('width') and request.form.get('height'):
             width = int(request.form.get('width'))
             height = int(request.form.get('height'))
-        
+
         if not image:
             raise ValueError("Image is required")
-        
+
         # Compress image if it's too large
         image = compress_image_base64(image)
-        
+
         # Optimize image
         optimized_image = optimize_image(image, quality, format, width, height)
-        
+
         return jsonify({
             'success': True,
             'image': optimized_image,
@@ -867,6 +882,7 @@ def optimize_image_route():
             'error': str(e)
         }), 500
 
+
 @app.route('/train/save', methods=['POST'])
 def save_training_image_route():
     try:
@@ -874,13 +890,13 @@ def save_training_image_route():
         image = request.form.get('image')
         name = request.form.get('name')
         category = request.form.get('category')
-        
+
         if not image or not name:
             raise ValueError("Image and name are required")
-        
+
         # Save training image
         result = save_training_image(image, name, category)
-        
+
         return jsonify({
             'success': True,
             'data': result
@@ -899,12 +915,13 @@ def save_training_image_route():
             'error': str(e)
         }), 500
 
+
 @app.route('/train/data', methods=['GET'])
 def get_training_data_route():
     try:
         # Get training data
         data = get_training_data()
-        
+
         return jsonify({
             'success': True,
             'data': data
@@ -917,18 +934,19 @@ def get_training_data_route():
             'error': str(e)
         }), 500
 
+
 @app.route('/train/delete', methods=['POST'])
 def delete_training_image_route():
     try:
         # Get parameters from request
         filename = request.form.get('filename')
-        
+
         if not filename:
             raise ValueError("Filename is required")
-        
+
         # Delete training image
         result = delete_training_image(filename)
-        
+
         return jsonify({
             'success': result
         })
@@ -946,6 +964,7 @@ def delete_training_image_route():
             'error': str(e)
         }), 500
 
+
 # Add a route to serve training images
 @app.route('/training_data/images/<filename>')
 def serve_training_image(filename):
@@ -956,12 +975,14 @@ def serve_training_image(filename):
         print(traceback.format_exc())
         return "Image not found", 404
 
+
 if __name__ == '__main__':
     # Increase the maximum request size for Werkzeug
     from werkzeug.serving import WSGIRequestHandler
+
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
-    
+
     # Set environment variable to increase max request size
     os.environ['WERKZEUG_SERVER_MAX_CONTENT_LENGTH'] = str(500 * 1024 * 1024)  # 500MB
-    
+
     app.run(debug=True, threaded=True)
