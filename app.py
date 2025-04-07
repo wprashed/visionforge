@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, Response
+from flask import Flask, request, jsonify, render_template, Response, send_from_directory
 import torch
 from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 from PIL import Image
@@ -9,13 +9,32 @@ import random
 import numpy as np
 import os
 import traceback
+import json
+import shutil
+from datetime import datetime
 
 # Create Flask app with increased max content length
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024  # 200MB limit
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB limit
+
+# Set the maximum request body size for Werkzeug
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app)
 
 # Check if CUDA is available and set the device accordingly
 device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# Create directories for training data
+TRAINING_DIR = "training_data"
+IMAGES_DIR = os.path.join(TRAINING_DIR, "images")
+METADATA_FILE = os.path.join(TRAINING_DIR, "metadata.json")
+
+os.makedirs(IMAGES_DIR, exist_ok=True)
+
+# Initialize metadata file if it doesn't exist
+if not os.path.exists(METADATA_FILE):
+    with open(METADATA_FILE, 'w') as f:
+        json.dump({"images": {}}, f)
 
 # Load the Stable Diffusion pipeline
 try:
@@ -23,7 +42,7 @@ try:
     pipe = StableDiffusionPipeline.from_pretrained(
         model_id,
         torch_dtype=torch.float16 if device == "cuda" else torch.float32,
-        safety_checker=None,
+        safety_checker=None,  # Disable safety checker for unrestricted generation
         requires_safety_checker=False
     )
 
@@ -47,64 +66,64 @@ except Exception as e:
     print(f"Error loading Stable Diffusion pipeline: {e}")
     pipe = None
 
-# Style Presets
+# Style Presets - Simplified to remove restrictions
 STYLE_PRESETS = {
     "photorealistic": {
         "name": "Photorealistic",
         "prompt_prefix": "photorealistic, highly detailed, professional photography, 8k, ",
         "prompt_suffix": ", hyperrealistic, photographic, detailed texture, natural lighting",
-        "negative_prompt": "cartoon, anime, illustration, painting, drawing, unrealistic, low quality"
+        "negative_prompt": "cartoon, anime, sketch, painting, drawing, illustration, low quality, low resolution, blurry"
     },
     "anime": {
         "name": "Anime",
         "prompt_prefix": "anime style, manga, 2D, ",
         "prompt_suffix": ", vibrant colors, clean lines, anime aesthetic",
-        "negative_prompt": "photorealistic, 3d render, photograph, realistic, grainy, noisy"
+        "negative_prompt": "photorealistic, photograph, low quality, low resolution, blurry"
     },
     "ghibli": {
         "name": "Ghibli",
         "prompt_prefix": "studio ghibli style, miyazaki, hand-drawn animation, painterly, ",
         "prompt_suffix": ", whimsical, soft lighting, detailed backgrounds, fantasy world, dreamy atmosphere",
-        "negative_prompt": "photorealistic, 3d render, photograph, realistic, grainy, noisy, dark, gloomy"
+        "negative_prompt": "photorealistic, photograph, low quality, low resolution, blurry"
     },
     "digital_art": {
         "name": "Digital Art",
         "prompt_prefix": "digital art, digital painting, trending on artstation, highly detailed, ",
         "prompt_suffix": ", vibrant colors, sharp focus, concept art, 4k, detailed",
-        "negative_prompt": "photograph, photo, realistic, blurry, grainy, noisy, low quality"
+        "negative_prompt": "low quality, low resolution, blurry"
     },
     "fantasy_art": {
         "name": "Fantasy Art",
         "prompt_prefix": "fantasy art style, magical, ethereal, mystical, ",
         "prompt_suffix": ", vibrant, detailed, epic scene, dramatic lighting, fantasy illustration",
-        "negative_prompt": "mundane, realistic, photograph, modern, urban"
+        "negative_prompt": "low quality, low resolution, blurry"
     },
     "pixel_art": {
         "name": "Pixel Art",
         "prompt_prefix": "pixel art style, 8-bit, retro game, ",
         "prompt_suffix": ", pixelated, low resolution, retro gaming aesthetic",
-        "negative_prompt": "smooth, high resolution, detailed, realistic, photorealistic"
+        "negative_prompt": "photorealistic, photograph, high resolution"
     },
     "abstract_art": {
         "name": "Abstract Art",
         "prompt_prefix": "abstract art, non-representational, ",
         "prompt_suffix": ", shapes, colors, expressive, modern art, contemporary",
-        "negative_prompt": "realistic, figurative, representational, detailed"
+        "negative_prompt": "photorealistic, photograph, low quality, blurry"
     }
 }
 
-# Face-specific enhancements
+# Face-specific enhancements - Enhanced for better face generation
 FACE_ENHANCEMENTS = {
-    "prompt_prefix": "perfect face, symmetrical features, detailed facial features, clear eyes, natural skin texture, realistic face, high quality face details, ",
-    "prompt_suffix": ", high quality portrait, professional portrait photography, studio lighting, 8k uhd, detailed face",
-    "negative_prompt": "deformed face, distorted face, disfigured, mutated, extra limbs, extra fingers, poorly drawn face, bad anatomy, blurry, low quality"
+    "prompt_prefix": "detailed facial features, high quality face details, symmetrical face, realistic skin texture, ",
+    "prompt_suffix": ", high quality portrait, professional portrait photography, studio lighting, 8k uhd, perfect face proportions, clear eyes, detailed iris",
+    "negative_prompt": "deformed face, distorted face, disfigured, bad anatomy, extra limbs, poorly drawn face, mutation, mutated, extra fingers, malformed limbs, too many fingers, long neck, cross-eyed, mutated hands, bad hands, bad eyes, poorly drawn hands, missing limb"
 }
 
-# Full-body enhancements
+# Full-body enhancements - Enhanced for better body generation
 FULL_BODY_ENHANCEMENTS = {
-    "prompt_prefix": "full body shot, full figure, standing pose, anatomically correct, ",
-    "prompt_suffix": ", full length portrait, entire body visible, proper proportions, well-proportioned body",
-    "negative_prompt": "cropped, partial body, missing limbs, cut off, zoomed in, close-up"
+    "prompt_prefix": "full body shot, full figure, standing pose, anatomically correct, proper proportions, ",
+    "prompt_suffix": ", full length portrait, entire body visible, detailed clothing, perfect anatomy",
+    "negative_prompt": "deformed, distorted, disfigured, bad anatomy, extra limbs, poorly drawn, mutation, mutated, extra fingers, malformed limbs, too many fingers, long neck, cross-eyed, mutated hands, bad hands, missing limb"
 }
 
 # Sample prompts organized by categories
@@ -257,7 +276,6 @@ SAMPLE_PROMPTS = {
     ]
 }
 
-
 def contains_face_keywords(prompt):
     """Check if the prompt likely contains a request for a face or portrait"""
     face_keywords = [
@@ -269,7 +287,6 @@ def contains_face_keywords(prompt):
     prompt_lower = prompt.lower()
     return any(keyword in prompt_lower for keyword in face_keywords)
 
-
 def contains_full_body_keywords(prompt):
     """Check if the prompt likely contains a request for a full body image"""
     full_body_keywords = [
@@ -279,8 +296,7 @@ def contains_full_body_keywords(prompt):
     if prompt is None:
         return False
     prompt_lower = prompt.lower()
-    return any(keyword in prompt_lower for keyword in full_body_keywords)
-
+    return any(keyword in prompt_lower for keyword in face_keywords)
 
 def generate_image(prompt, height=1024, width=768, style='photorealistic', face_enhancement=False):
     """
@@ -300,30 +316,41 @@ def generate_image(prompt, height=1024, width=768, style='photorealistic', face_
     # Get the style preset
     style_preset = STYLE_PRESETS.get(style.lower(), STYLE_PRESETS["photorealistic"])
 
+    # Check if the prompt contains human/face-related terms
+    has_face_terms = contains_face_keywords(prompt)
+    has_full_body_terms = contains_full_body_keywords(prompt)
+    
     # Prepare the prompt
     final_prompt = f"{style_preset['prompt_prefix']}{prompt}{style_preset['prompt_suffix']}"
+    
+    # Prepare negative prompt - avoid low quality by default
     negative_prompt = style_preset['negative_prompt']
-
-    # Check if this is a full body request
-    is_full_body = contains_full_body_keywords(prompt)
-
-    # Apply full body enhancements if needed
-    if is_full_body:
+    
+    # Only apply face enhancements if explicitly requested by checkbox OR prompt contains face terms
+    if (face_enhancement and has_face_terms) or (style == 'photorealistic' and has_face_terms):
+        final_prompt = f"{FACE_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FACE_ENHANCEMENTS['prompt_suffix']}"
+        # Use face enhancement negative prompt if provided
+        if FACE_ENHANCEMENTS['negative_prompt']:
+            negative_prompt = FACE_ENHANCEMENTS['negative_prompt']
+    
+    # Only apply full body enhancements if explicitly requested in the prompt
+    if has_full_body_terms:
         final_prompt = f"{FULL_BODY_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FULL_BODY_ENHANCEMENTS['prompt_suffix']}"
-        negative_prompt = f"{negative_prompt}, {FULL_BODY_ENHANCEMENTS['negative_prompt']}"
-
+        # Use full body enhancement negative prompt if provided
+        if FULL_BODY_ENHANCEMENTS['negative_prompt']:
+            negative_prompt = FULL_BODY_ENHANCEMENTS['negative_prompt']
+        
         # For full body shots, use a wider aspect ratio
         if height > width * 1.5:  # If too tall and narrow
             height = int(width * 1.5)  # Use 3:2 aspect ratio for full body
 
-    # Apply face enhancements if requested or if the prompt contains face-related keywords
-    if face_enhancement or contains_face_keywords(prompt):
-        final_prompt = f"{FACE_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FACE_ENHANCEMENTS['prompt_suffix']}"
-        negative_prompt = f"{negative_prompt}, {FACE_ENHANCEMENTS['negative_prompt']}"
+    # Log the final prompt and negative prompt for debugging
+    print(f"Final prompt: {final_prompt}")
+    print(f"Negative prompt: {negative_prompt}")
 
-    # Set inference parameters
-    inference_steps = 30
-    guidance_scale = 7.5
+    # Set inference parameters - increased for better quality
+    inference_steps = 40
+    guidance_scale = 7.5  # Slightly reduced to avoid over-filtering
 
     # Set a seed for more consistent generation
     seed = random.randint(1, 2147483647)
@@ -353,7 +380,6 @@ def generate_image(prompt, height=1024, width=768, style='photorealistic', face_
 
     return image
 
-
 def inpaint_image(original_image_base64, mask_base64, prompt, style='photorealistic', face_enhancement=False):
     """
     Inpaints an image based on the given mask and prompt.
@@ -378,7 +404,7 @@ def inpaint_image(original_image_base64, mask_base64, prompt, style='photorealis
 
         original_image_data = base64.b64decode(original_image_base64)
         mask_data = base64.b64decode(mask_base64)
-
+        
         original_image = Image.open(io.BytesIO(original_image_data))
         mask_image = Image.open(io.BytesIO(mask_data)).convert("RGB")
 
@@ -388,26 +414,37 @@ def inpaint_image(original_image_base64, mask_base64, prompt, style='photorealis
         # Get the style preset
         style_preset = STYLE_PRESETS.get(style.lower(), STYLE_PRESETS["photorealistic"])
 
+        # Check if the prompt contains human/face-related terms
+        has_face_terms = contains_face_keywords(prompt)
+        has_full_body_terms = contains_full_body_keywords(prompt)
+        
         # Prepare the prompt
         final_prompt = f"{style_preset['prompt_prefix']}{prompt}{style_preset['prompt_suffix']}"
+        
+        # Prepare negative prompt - avoid low quality by default
         negative_prompt = style_preset['negative_prompt']
-
-        # Check if this is a full body request
-        is_full_body = contains_full_body_keywords(prompt)
-
-        # Apply full body enhancements if needed
-        if is_full_body:
-            final_prompt = f"{FULL_BODY_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FULL_BODY_ENHANCEMENTS['prompt_suffix']}"
-            negative_prompt = f"{negative_prompt}, {FULL_BODY_ENHANCEMENTS['negative_prompt']}"
-
-        # Apply face enhancements if requested or if the prompt contains face-related keywords
-        if face_enhancement or contains_face_keywords(prompt):
+        
+        # Only apply face enhancements if explicitly requested by checkbox OR prompt contains face terms
+        if (face_enhancement and has_face_terms) or (style == 'photorealistic' and has_face_terms):
             final_prompt = f"{FACE_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FACE_ENHANCEMENTS['prompt_suffix']}"
-            negative_prompt = f"{negative_prompt}, {FACE_ENHANCEMENTS['negative_prompt']}"
+            # Use face enhancement negative prompt if provided
+            if FACE_ENHANCEMENTS['negative_prompt']:
+                negative_prompt = FACE_ENHANCEMENTS['negative_prompt']
+        
+        # Only apply full body enhancements if explicitly requested in the prompt
+        if has_full_body_terms:
+            final_prompt = f"{FULL_BODY_ENHANCEMENTS['prompt_prefix']}{final_prompt}{FULL_BODY_ENHANCEMENTS['prompt_suffix']}"
+            # Use full body enhancement negative prompt if provided
+            if FULL_BODY_ENHANCEMENTS['negative_prompt']:
+                negative_prompt = FULL_BODY_ENHANCEMENTS['negative_prompt']
 
-        # Set inference parameters
-        inference_steps = 30
-        guidance_scale = 7.5
+        # Log the final prompt and negative prompt for debugging
+        print(f"Inpaint final prompt: {final_prompt}")
+        print(f"Inpaint negative prompt: {negative_prompt}")
+
+        # Set inference parameters - increased for better quality
+        inference_steps = 40
+        guidance_scale = 7.5  # Slightly reduced to avoid over-filtering
 
         # Set a seed for more consistent generation
         seed = random.randint(1, 2147483647)
@@ -444,8 +481,7 @@ def inpaint_image(original_image_base64, mask_base64, prompt, style='photorealis
         print(traceback.format_exc())
         raise
 
-
-def compress_image_base64(image_base64, max_size_kb=5000):
+def compress_image_base64(image_base64, max_size_kb=1000):
     """
     Compresses an image to reduce its size while maintaining quality.
     Args:
@@ -464,29 +500,43 @@ def compress_image_base64(image_base64, max_size_kb=5000):
         # Decode base64 image
         image_data = base64.b64decode(image_base64)
         image = Image.open(io.BytesIO(image_data))
-
-        # Initial quality
-        quality = 95
+        
+        # Initial quality and size
+        quality = 85
         max_size_bytes = max_size_kb * 1024
-
+        
+        # First, resize large images immediately
+        width, height = image.size
+        max_dimension = 1600  # Limit maximum dimension
+        
+        if width > max_dimension or height > max_dimension:
+            if width > height:
+                new_width = max_dimension
+                new_height = int(height * (max_dimension / width))
+            else:
+                new_height = max_dimension
+                new_width = int(width * (max_dimension / height))
+            
+            image = image.resize((new_width, new_height), Image.LANCZOS)
+        
         # Try to compress the image
-        while quality > 30:  # Don't go below quality 30
+        while quality > 20:  # Lower minimum quality to 20
             buffered = io.BytesIO()
-
+            
             # Convert to RGB if needed
             if image.mode == "RGBA":
                 image = image.convert("RGB")
-
+                
             # Save with compression
             image.save(buffered, format="JPEG", quality=quality, optimize=True)
-
+            
             # Check size
             if buffered.tell() <= max_size_bytes:
                 break
-
+                
             # Reduce quality and try again
-            quality -= 10
-
+            quality -= 15  # More aggressive quality reduction
+            
         # If still too large, resize the image
         if buffered.tell() > max_size_bytes:
             # Calculate new dimensions to reduce size
@@ -494,12 +544,12 @@ def compress_image_base64(image_base64, max_size_kb=5000):
             ratio = (max_size_bytes / buffered.tell()) ** 0.5  # Square root to apply to both dimensions
             new_width = int(width * ratio)
             new_height = int(height * ratio)
-
+            
             # Resize and compress again
             image = image.resize((new_width, new_height), Image.LANCZOS)
             buffered = io.BytesIO()
             image.save(buffered, format="JPEG", quality=quality, optimize=True)
-
+        
         # Get base64 encoded result
         img_str = base64.b64encode(buffered.getvalue()).decode()
         return prefix + img_str
@@ -508,7 +558,6 @@ def compress_image_base64(image_base64, max_size_kb=5000):
         print(traceback.format_exc())
         # Return original if compression fails
         return image_base64
-
 
 def optimize_image(image_base64, quality=85, format="png", width=None, height=None):
     """
@@ -561,16 +610,117 @@ def optimize_image(image_base64, quality=85, format="png", width=None, height=No
         print(traceback.format_exc())
         raise
 
+def save_training_image(image_base64, name, category=None):
+    """
+    Saves an image for training purposes.
+    Args:
+        image_base64 (str): Base64 encoded image
+        name (str): Name/label for the image
+        category (str, optional): Category for the image
+    Returns:
+        dict: Information about the saved image
+    """
+    try:
+        # Handle data URL prefix if present
+        if ',' in image_base64:
+            image_base64 = image_base64.split(',')[1]
+
+        # Decode base64 image
+        image_data = base64.b64decode(image_base64)
+        image = Image.open(io.BytesIO(image_data))
+        
+        # Generate a unique filename
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        filename = f"{name.replace(' ', '_')}_{timestamp}.png"
+        filepath = os.path.join(IMAGES_DIR, filename)
+        
+        # Save the image
+        image.save(filepath, format="PNG")
+        
+        # Update metadata
+        with open(METADATA_FILE, 'r') as f:
+            metadata = json.load(f)
+        
+        metadata["images"][filename] = {
+            "name": name,
+            "category": category,
+            "timestamp": timestamp,
+            "path": filepath
+        }
+        
+        with open(METADATA_FILE, 'w') as f:
+            json.dump(metadata, f, indent=2)
+        
+        return {
+            "filename": filename,
+            "name": name,
+            "category": category,
+            "timestamp": timestamp
+        }
+    except Exception as e:
+        print(f"Error in save_training_image: {e}")
+        print(traceback.format_exc())
+        raise
+
+def get_training_data():
+    """
+    Gets all training data.
+    Returns:
+        dict: All training data
+    """
+    try:
+        with open(METADATA_FILE, 'r') as f:
+            metadata = json.load(f)
+        return metadata
+    except Exception as e:
+        print(f"Error in get_training_data: {e}")
+        print(traceback.format_exc())
+        return {"images": {}}
+
+def delete_training_image(filename):
+    """
+    Deletes a training image.
+    Args:
+        filename (str): The filename of the image to delete
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        # Get metadata
+        with open(METADATA_FILE, 'r') as f:
+            metadata = json.load(f)
+        
+        # Check if file exists in metadata
+        if filename not in metadata["images"]:
+            return False
+        
+        # Get file path
+        filepath = metadata["images"][filename]["path"]
+        
+        # Delete file if it exists
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        
+        # Remove from metadata
+        del metadata["images"][filename]
+        
+        # Save updated metadata
+        with open(METADATA_FILE, 'w') as f:
+            json.dump(metadata, f, indent=2)
+        
+        return True
+    except Exception as e:
+        print(f"Error in delete_training_image: {e}")
+        print(traceback.format_exc())
+        return False
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-
 @app.route('/sample_prompts')
 def sample_prompts():
     return jsonify(SAMPLE_PROMPTS)
-
 
 @app.route('/generate', methods=['POST'])
 def generate_image_route():
@@ -625,7 +775,6 @@ def generate_image_route():
             torch.cuda.empty_cache()
         gc.collect()
 
-
 @app.route('/inpaint', methods=['POST'])
 def inpaint_image_route():
     try:
@@ -639,22 +788,22 @@ def inpaint_image_route():
         if not original_image or not mask or not prompt:
             raise ValueError("Original image, mask, and prompt are required")
 
-        # Compress images if they're too large
-        original_image = compress_image_base64(original_image)
-        mask = compress_image_base64(mask)
+        # Compress images with more aggressive settings
+        original_image = compress_image_base64(original_image, max_size_kb=800)
+        mask = compress_image_base64(mask, max_size_kb=500)
 
         # Inpaint image
         img = inpaint_image(original_image, mask, prompt, style, face_enhancement)
 
-        # Convert to base64
+        # Convert to base64 with compression
         buffered = io.BytesIO()
-        img.save(buffered, format="PNG", optimize=True)
+        img.save(buffered, format="JPEG", quality=85, optimize=True)
         img_str = base64.b64encode(buffered.getvalue()).decode()
 
         return jsonify({
             'success': True,
             'image': img_str,
-            'format': 'png'
+            'format': 'jpeg'
         })
     except ValueError as ve:
         print(f"ValueError in inpaint_image_route: {ve}")
@@ -675,7 +824,6 @@ def inpaint_image_route():
             torch.cuda.empty_cache()
         gc.collect()
 
-
 @app.route('/optimize', methods=['POST'])
 def optimize_image_route():
     try:
@@ -683,23 +831,23 @@ def optimize_image_route():
         image = request.form.get('image')
         quality = int(request.form.get('quality', 85))
         format = request.form.get('format', 'png')
-
+        
         # Get dimensions if provided
         width = None
         height = None
         if request.form.get('width') and request.form.get('height'):
             width = int(request.form.get('width'))
             height = int(request.form.get('height'))
-
+        
         if not image:
             raise ValueError("Image is required")
-
+        
         # Compress image if it's too large
         image = compress_image_base64(image)
-
+        
         # Optimize image
         optimized_image = optimize_image(image, quality, format, width, height)
-
+        
         return jsonify({
             'success': True,
             'image': optimized_image,
@@ -719,14 +867,101 @@ def optimize_image_route():
             'error': str(e)
         }), 500
 
+@app.route('/train/save', methods=['POST'])
+def save_training_image_route():
+    try:
+        # Get parameters from request
+        image = request.form.get('image')
+        name = request.form.get('name')
+        category = request.form.get('category')
+        
+        if not image or not name:
+            raise ValueError("Image and name are required")
+        
+        # Save training image
+        result = save_training_image(image, name, category)
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+    except ValueError as ve:
+        print(f"ValueError in save_training_image_route: {ve}")
+        return jsonify({
+            'success': False,
+            'error': str(ve)
+        }), 400
+    except Exception as e:
+        print(f"Exception in save_training_image_route: {e}")
+        print(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/train/data', methods=['GET'])
+def get_training_data_route():
+    try:
+        # Get training data
+        data = get_training_data()
+        
+        return jsonify({
+            'success': True,
+            'data': data
+        })
+    except Exception as e:
+        print(f"Exception in get_training_data_route: {e}")
+        print(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/train/delete', methods=['POST'])
+def delete_training_image_route():
+    try:
+        # Get parameters from request
+        filename = request.form.get('filename')
+        
+        if not filename:
+            raise ValueError("Filename is required")
+        
+        # Delete training image
+        result = delete_training_image(filename)
+        
+        return jsonify({
+            'success': result
+        })
+    except ValueError as ve:
+        print(f"ValueError in delete_training_image_route: {ve}")
+        return jsonify({
+            'success': False,
+            'error': str(ve)
+        }), 400
+    except Exception as e:
+        print(f"Exception in delete_training_image_route: {e}")
+        print(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# Add a route to serve training images
+@app.route('/training_data/images/<filename>')
+def serve_training_image(filename):
+    try:
+        return send_from_directory(IMAGES_DIR, filename)
+    except Exception as e:
+        print(f"Error serving training image: {e}")
+        print(traceback.format_exc())
+        return "Image not found", 404
 
 if __name__ == '__main__':
     # Increase the maximum request size for Werkzeug
     from werkzeug.serving import WSGIRequestHandler
-
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
-
+    
     # Set environment variable to increase max request size
-    os.environ['WERKZEUG_SERVER_MAX_CONTENT_LENGTH'] = str(200 * 1024 * 1024)  # 200MB
-
-    app.run(debug=True)
+    os.environ['WERKZEUG_SERVER_MAX_CONTENT_LENGTH'] = str(500 * 1024 * 1024)  # 500MB
+    
+    app.run(debug=True, threaded=True)
