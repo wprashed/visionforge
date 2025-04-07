@@ -19,14 +19,14 @@
             --text: #e2e8f0;
             --text-muted: #94a3b8;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-dark);
             color: var(--text);
             line-height: 1.6;
         }
-
+        
         .container {
             max-width: 1100px;
             margin: 20px auto;
@@ -35,22 +35,15 @@
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
+        
+        label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
         }
-
-        .input-group input[type="text"],
-        .input-group input[type="number"],
-        .input-group select,
-        .input-group textarea,
-        .input-group input[type="range"] {
+        
+        input,
+        textarea{
             width: 100%;
             padding: 12px;
             border: 1px solid var(--border);
@@ -61,15 +54,14 @@
             margin-bottom: 10px;
             transition: all 0.3s ease;
         }
-
-        .input-group input:focus,
-        .input-group select:focus,
-        .input-group textarea:focus {
+        
+        input:focus,
+        textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
         }
-
+        
         .btn {
             padding: 14px 28px;
             border: none;
@@ -87,53 +79,53 @@
             min-width: 160px;
             height: 50px;
         }
-
+        
         .btn:hover {
             background-color: var(--primary-hover);
             transform: translateY(-2px);
         }
-
+        
         .btn:disabled {
             background-color: #64748b;
             cursor: not-allowed;
             transform: none;
         }
-
+        
         .btn-secondary {
             background-color: var(--secondary);
         }
-
+        
         .btn-secondary:hover {
             background-color: var(--secondary-hover);
         }
-
+        
         .btn-outline {
             background-color: transparent;
             border: 1px solid var(--primary);
             color: var(--primary);
         }
-
+        
         .btn-outline:hover {
             background-color: rgba(99, 102, 241, 0.1);
         }
-
+        
         #result {
             margin-top: 30px;
             text-align: center;
         }
-
+        
         #generatedImage {
             max-width: 100%;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
-
+        
         #loading {
             display: none;
             text-align: center;
             margin-top: 20px;
         }
-
+        
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%;
@@ -143,12 +135,12 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 15px;
         }
-
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
+        
         #error-message {
             color: #ef4444;
             margin-top: 10px;
@@ -156,7 +148,7 @@
             border-radius: 8px;
             background-color: rgba(239, 68, 68, 0.1);
         }
-
+        
         /* Tabs Styles */
         .tabs {
             display: flex;
@@ -166,11 +158,11 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
-
+        
         .tabs::-webkit-scrollbar {
             display: none;
         }
-
+        
         .tab {
             padding: 12px 24px;
             cursor: pointer;
@@ -184,31 +176,31 @@
             margin-bottom: -2px;
             white-space: nowrap;
         }
-
+        
         .tab:hover {
             color: var(--text);
         }
-
+        
         .tab.active {
             border-bottom: 2px solid var(--primary);
             color: var(--primary);
         }
-
+        
         .tab-content {
             display: none;
         }
-
+        
         .tab-content.active {
             display: block;
         }
-
+        
         .style-options {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
         }
-
+        
         .style-option {
             padding: 10px 18px;
             border: 1px solid var(--border);
@@ -218,18 +210,18 @@
             transition: all 0.3s ease;
             font-weight: 500;
         }
-
+        
         .style-option:hover {
             background-color: var(--border);
             transform: translateY(-2px);
         }
-
+        
         .style-option.selected {
             background-color: var(--border);
             border-color: var(--primary);
             color: var(--primary);
         }
-
+        
         .download-btn {
             display: inline-flex;
             align-items: center;
@@ -245,38 +237,38 @@
             min-width: 160px;
             height: 50px;
         }
-
+        
         .download-btn:hover {
             background-color: var(--primary-hover);
             transform: translateY(-2px);
         }
-
+        
         .checkbox-container {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
         }
-
+        
         .checkbox-container input[type="checkbox"] {
             width: 18px;
             height: 18px;
             margin-right: 10px;
             accent-color: var(--primary);
         }
-
+        
         .info-text {
             font-size: 14px;
             color: var(--text-muted);
             margin-top: 6px;
         }
-
+        
         .style-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 16px;
             margin-bottom: 20px;
         }
-
+        
         .style-card {
             border: 2px solid transparent;
             border-radius: 12px;
@@ -286,23 +278,23 @@
             position: relative;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
+        
         .style-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
         }
-
+        
         .style-card.selected {
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
         }
-
+        
         .style-image {
             width: 100%;
             height: 140px;
             object-fit: cover;
         }
-
+        
         .style-label {
             position: absolute;
             bottom: 0;
@@ -315,14 +307,14 @@
             font-weight: 500;
             backdrop-filter: blur(4px);
         }
-
+        
         .aspect-ratio-options {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             margin-top: 10px;
         }
-
+        
         .aspect-ratio-btn {
             padding: 8px 14px;
             background-color: var(--bg-card);
@@ -332,17 +324,17 @@
             font-size: 14px;
             transition: all 0.3s ease;
         }
-
+        
         .aspect-ratio-btn:hover {
             background-color: var(--border);
         }
-
+        
         .aspect-ratio-btn.selected {
             background-color: var(--border);
             border-color: var(--primary);
             color: var(--primary);
         }
-
+        
         .prompt-library {
             margin-top: 20px;
             padding: 20px;
@@ -350,11 +342,11 @@
             border-radius: 12px;
             border: 1px solid var(--border);
         }
-
+        
         .prompt-category {
             margin-bottom: 20px;
         }
-
+        
         .category-title {
             font-weight: 600;
             margin-bottom: 10px;
@@ -365,27 +357,27 @@
             border-radius: 6px;
             transition: all 0.2s ease;
         }
-
+        
         .category-title:hover {
             background-color: rgba(255, 255, 255, 0.05);
         }
-
+        
         .category-title i {
             margin-right: 10px;
             transition: transform 0.3s ease;
         }
-
+        
         .category-title.collapsed i {
             transform: rotate(-90deg);
         }
-
+        
         .prompt-list {
             max-height: 250px;
             overflow-y: auto;
             padding-right: 10px;
             margin-left: 10px;
         }
-
+        
         .prompt-item {
             padding: 10px 14px;
             margin-bottom: 8px;
@@ -396,25 +388,25 @@
             font-size: 14px;
             border: 1px solid transparent;
         }
-
+        
         .prompt-item:hover {
             background-color: var(--border);
             border-color: var(--primary);
             transform: translateX(5px);
         }
-
+        
         .prompt-search {
             margin-bottom: 20px;
             position: relative;
         }
-
+        
         .prompt-search input {
             padding-left: 40px;
             border-radius: 8px;
             font-size: 16px;
             height: 50px;
         }
-
+        
         .prompt-search i {
             position: absolute;
             left: 15px;
@@ -423,30 +415,30 @@
             color: var(--text-muted);
             font-size: 18px;
         }
-
+        
         /* Custom scrollbar */
         .prompt-list::-webkit-scrollbar {
             width: 8px;
         }
-
+        
         .prompt-list::-webkit-scrollbar-track {
             background: var(--bg-input);
             border-radius: 4px;
         }
-
+        
         .prompt-list::-webkit-scrollbar-thumb {
             background: var(--border);
             border-radius: 4px;
         }
-
+        
         .prompt-list::-webkit-scrollbar-thumb:hover {
             background: #475569;
         }
-
+        
         .collapsed + .prompt-list {
             display: none;
         }
-
+        
         /* Canvas styles */
         #canvas-container {
             position: relative;
@@ -455,13 +447,13 @@
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
-
+        
         #edit-canvas {
             background-color: transparent;
             cursor: crosshair;
             display: block;
         }
-
+        
         .canvas-controls {
             display: flex;
             justify-content: space-between;
@@ -469,27 +461,27 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-
+        
         .brush-size {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
+        
         .brush-size input {
             width: 150px;
         }
-
+        
         .brush-size span {
             min-width: 30px;
             text-align: center;
         }
-
+        
         .canvas-actions {
             display: flex;
             gap: 10px;
         }
-
+        
         /* Optimize tab styles */
         .optimize-controls {
             display: grid;
@@ -497,41 +489,41 @@
             gap: 20px;
             margin-bottom: 20px;
         }
-
+        
         .optimize-control {
             background-color: var(--bg-input);
             padding: 15px;
             border-radius: 10px;
             border: 1px solid var(--border);
         }
-
+        
         .optimize-control h3 {
             margin-bottom: 10px;
             font-weight: 600;
         }
-
+        
         .range-with-value {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
+        
         .range-with-value input[type="range"] {
             flex-grow: 1;
         }
-
+        
         .range-with-value span {
             min-width: 40px;
             text-align: center;
             font-weight: 600;
         }
-
+        
         .format-options {
             display: flex;
             gap: 10px;
             margin-top: 10px;
         }
-
+        
         .format-option {
             padding: 8px 16px;
             background-color: var(--bg-card);
@@ -540,43 +532,43 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-
+        
         .format-option:hover {
             background-color: var(--border);
         }
-
+        
         .format-option.selected {
             background-color: var(--border);
             border-color: var(--primary);
             color: var(--primary);
         }
-
+        
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
                 margin: 10px;
             }
-
+            
             .style-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-
+            
             .canvas-controls {
                 flex-direction: column;
             }
-
+            
             .optimize-controls {
                 grid-template-columns: 1fr;
             }
         }
-
+        
         /* Tooltip styles */
         .tooltip {
             position: relative;
             display: inline-block;
         }
-
+        
         .tooltip .tooltiptext {
             visibility: hidden;
             width: 200px;
@@ -595,7 +587,7 @@
             font-size: 14px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
+        
         .tooltip .tooltiptext::after {
             content: "";
             position: absolute;
@@ -606,17 +598,250 @@
             border-style: solid;
             border-color: #2d3748 transparent transparent transparent;
         }
-
+        
         .tooltip:hover .tooltiptext {
             visibility: visible;
             opacity: 1;
+        }
+
+        /* Processing Animations */
+        .processing-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(15, 23, 42, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 12px;
+            backdrop-filter: blur(3px);
+        }
+
+        .processing-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .processing-text {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .processing-subtext {
+            color: var(--text-muted);
+            font-size: 14px;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        /* Add animation for the progress bar */
+        .progress-bar-container {
+            width: 80%;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--primary);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            animation: progress-animation 2s infinite;
+        }
+
+        @keyframes progress-animation {
+            0% { width: 15%; }
+            50% { width: 85%; }
+            100% { width: 15%; }
+        }
+        
+        /* Training tab styles */
+        .training-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .training-card {
+            background-color: var(--bg-input);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .training-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        .training-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .training-info {
+            padding: 15px;
+        }
+        
+        .training-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .training-category {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .training-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .training-action-btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        
+        .training-action-btn:hover {
+            background-color: var(--border);
+        }
+        
+        .training-action-btn.delete {
+            color: #ef4444;
+            border-color: #ef4444;
+        }
+        
+        .training-action-btn.delete:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+        
+        .training-empty {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: var(--bg-input);
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .training-empty i {
+            font-size: 48px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        
+        .training-empty h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .training-empty p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        
+        .training-form {
+            background-color: var(--bg-input);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .training-form h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .file-upload {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            background-color: var(--bg-card);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--primary);
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+        
+        .file-upload i {
+            font-size: 36px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+        
+        .file-upload p {
+            text-align: center;
+        }
+        
+        .file-upload input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .preview-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="text-3xl font-bold mb-6 text-center">Vision Forge - AI Image Generator</h1>
-
+        
         <!-- Tabs -->
         <div class="tabs">
             <button class="tab active" data-tab="generate">Generate</button>
@@ -624,27 +849,28 @@
             <button class="tab" data-tab="edit">Edit</button>
             <button class="tab" data-tab="optimize">Optimize</button>
             <button class="tab" data-tab="prompt-library">Prompt Library</button>
+            <button class="tab" data-tab="training">Training</button>
         </div>
-
+        
         <!-- Generate Tab Content -->
         <div id="generate" class="tab-content active">
             <div class="mb-6">
                 <label for="prompt" class="block text-lg font-medium mb-3">Prompt</label>
                 <textarea id="prompt" rows="3" class="w-full p-4 border rounded-md" placeholder="Enter a prompt to generate an image"></textarea>
             </div>
-
+            
             <div class="grid grid-cols-2 gap-6 mb-6">
                 <div>
                     <label for="width" class="block text-lg font-medium mb-3">Width</label>
                     <input type="number" id="width" class="w-full p-4 border rounded-md" value="512" min="256" step="8">
-
+                    
                 </div>
                 <div>
                     <label for="height" class="block text-lg font-medium mb-3">Height</label>
                     <input type="number" id="height" class="w-full p-4 border rounded-md" value="512" min="256" step="8">
                 </div>
             </div>
-
+            
             <div class="mb-4">
                 <label class="block text-lg font-medium mb-2">Common Aspect Ratios</label>
                 <div class="aspect-ratio-options">
@@ -655,7 +881,7 @@
                     <button type="button" class="aspect-ratio-btn" data-width="576" data-height="768">3:4 Portrait</button>
                 </div>
             </div>
-
+            
             <div class="mb-6">
                 <label class="block text-lg font-medium mb-3">Style</label>
                 <div class="style-grid">
@@ -698,19 +924,19 @@
                 </div>
                 <p class="info-text">Improves facial details, symmetry, and realism when generating human faces or portraits.</p>
             </div>
-
+            
             <button id="generateBtn" class="w-full btn">
                 <i class="fas fa-magic"></i> Generate Image
             </button>
-
+            
             <!-- Error Message -->
             <div id="error-message" class="mt-4 hidden"></div>
         </div>
-
+        
         <!-- View Tab Content -->
         <div id="view" class="tab-content">
             <div id="result" class="hidden">
-                <img id="generatedImage" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/681px-Placeholder_view_vector.svg.png" alt="Generated Image">
+                <img id="generatedImage" src="https://raw.githubusercontent.com/wprashed/visionforge/refs/heads/main/templates/placeholder.png" alt="Generated Image">
                 <p id="imageInfo" class="mt-4 text-gray-400"></p>
                 <div class="flex justify-center gap-4 mt-4">
                     <a href="#" id="downloadBtn" class="download-btn">
@@ -722,24 +948,27 @@
                     <button id="optimizeImageBtn" class="btn btn-secondary">
                         <i class="fas fa-sliders-h"></i> Optimize
                     </button>
+                    <button id="saveTrainingBtn" class="btn btn-outline">
+                        <i class="fas fa-save"></i> Save for Training
+                    </button>
                 </div>
             </div>
         </div>
-
+        
         <!-- Edit Tab Content -->
         <div id="edit" class="tab-content">
             <div class="mb-6">
                 <label for="edit-prompt" class="block text-lg font-medium mb-3">Edit Prompt</label>
                 <textarea id="edit-prompt" rows="3" class="w-full p-4 border rounded-md" placeholder="Describe what you want to change in the selected area"></textarea>
             </div>
-
+            
             <div class="canvas-controls">
                 <div class="brush-size">
                     <label for="brush-size">Brush Size:</label>
                     <input type="range" id="brush-size" min="5" max="100" value="20">
                     <span id="brush-size-value">20px</span>
                 </div>
-
+                
                 <div class="canvas-actions">
                     <button id="clear-canvas" class="btn btn-outline">
                         <i class="fas fa-eraser"></i> Clear Selection
@@ -752,11 +981,21 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Fix the animation issue by ensuring the processing overlays are hidden by default -->
 
             <div id="canvas-container">
                 <canvas id="edit-canvas"></canvas>
+                <div id="edit-processing" class="processing-overlay" style="display: none;">
+                    <div class="processing-spinner"></div>
+                    <div class="processing-text">Editing Image...</div>
+                    <div class="processing-subtext">Applying your changes to the selected areas. This may take a minute depending on the complexity.</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                </div>
             </div>
-
+            
             <div class="mt-6">
                 <div class="checkbox-container">
                     <input type="checkbox" id="edit-face-enhancement" checked>
@@ -764,12 +1003,12 @@
                 </div>
                 <p class="info-text">Improves facial details when editing faces or portraits.</p>
             </div>
-
+            
             <button id="apply-edit" class="w-full btn mt-4">
                 <i class="fas fa-paint-brush"></i> Apply Edit
             </button>
         </div>
-
+        
         <!-- Optimize Tab Content -->
         <div id="optimize" class="tab-content">
             <div class="optimize-controls">
@@ -781,7 +1020,7 @@
                     </div>
                     <p class="info-text">Higher quality means larger file size.</p>
                 </div>
-
+                
                 <div class="optimize-control">
                     <h3>Format</h3>
                     <div class="format-options">
@@ -791,7 +1030,7 @@
                     </div>
                     <p class="info-text">PNG is lossless but larger. JPEG and WebP are smaller but lossy.</p>
                 </div>
-
+                
                 <div class="optimize-control">
                     <h3>Dimensions</h3>
                     <div class="grid grid-cols-2 gap-4">
@@ -810,12 +1049,21 @@
                     </div>
                 </div>
             </div>
-
+            
+            <!-- Fix the optimize processing overlay -->
             <div id="optimize-preview" class="text-center mb-6">
-                <img id="optimized-image" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/681px-Placeholder_view_vector.svg.png" alt="Optimized Image" class="max-w-full mx-auto rounded-lg shadow-lg">
+                <img id="optimized-image" src="https://raw.githubusercontent.com/wprashed/visionforge/refs/heads/main/templates/placeholder.png" alt="Optimized Image" class="max-w-full mx-auto rounded-lg shadow-lg">
+                <div id="optimize-processing" class="processing-overlay" style="display: none;">
+                    <div class="processing-spinner"></div>
+                    <div class="processing-text">Optimizing Image...</div>
+                    <div class="processing-subtext">Adjusting quality, format, and dimensions to create the optimized version.</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                </div>
                 <p id="optimize-info" class="mt-2 text-gray-400"></p>
             </div>
-
+            
             <div class="flex justify-center gap-4">
                 <button id="apply-optimize" class="btn">
                     <i class="fas fa-compress-arrows-alt"></i> Apply Optimization
@@ -825,611 +1073,1000 @@
                 </a>
             </div>
         </div>
-
+        
         <!-- Prompt Library Tab Content -->
         <div id="prompt-library" class="tab-content">
             <div class="prompt-search">
                 <i class="fas fa-search"></i>
                 <input type="text" id="prompt-search" placeholder="Search prompts..." class="w-full p-4 border rounded-md">
             </div>
-
+            
             <div id="prompt-categories" class="prompt-library">
                 <!-- Categories will be populated by JavaScript -->
             </div>
         </div>
-
+        
+        <!-- Training Tab Content -->
+        <div id="training" class="tab-content">
+            <div class="training-form">
+                <h3>Add New Training Image</h3>
+                <div class="file-upload" id="file-upload">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Drag & drop an image here, or click to select</p>
+                    <p class="info-text">Supported formats: JPG, PNG, WebP</p>
+                    <input type="file" id="training-image-upload" accept="image/*">
+                </div>
+                
+                <div class="preview-container" id="preview-container" style="display: none;">
+                    <img id="preview-image" class="preview-image" src="/placeholder.svg" alt="Preview">
+                </div>
+                
+                <div class="mt-4">
+                    <label for="training-name" class="block text-lg font-medium mb-2">Name/Label</label>
+                    <input type="text" id="training-name" class="w-full p-4 border rounded-md" placeholder="Enter a name or label for this image">
+                </div>
+                
+                <div class="mt-4">
+                    <label for="training-category" class="block text-lg font-medium mb-2">Category (Optional)</label>
+                    <input type="text" id="training-category" class="w-full p-4 border rounded-md" placeholder="Enter a category for this image">
+                </div>
+                
+                <button id="save-training-image" class="w-full btn mt-6" disabled>
+                    <i class="fas fa-save"></i> Save Training Image
+                </button>
+            </div>
+            
+            <h2 class="text-2xl font-bold mt-8 mb-4">Training Dataset</h2>
+            
+            <div id="training-grid" class="training-grid">
+                <!-- Training images will be populated here -->
+            </div>
+            
+            <div id="training-empty" class="training-empty" style="display: none;">
+                <i class="fas fa-database"></i>
+                <h3>No Training Images Yet</h3>
+                <p>Add images to your training dataset to help improve the model's performance.</p>
+            </div>
+        </div>
+        
         <!-- Loading Indicator -->
         <div id="loading" class="hidden">
             <div class="spinner"></div>
             <p>Creating your image, please wait...</p>
             <p class="info-text">This may take a minute depending on the complexity and size.</p>
         </div>
+        
+        <!-- Save for Training Modal -->
+        <div id="save-training-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+            <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg z-10 max-w-md w-full">
+                <h3 class="text-xl font-bold mb-4">Save Image for Training</h3>
+                
+                <div class="mb-4">
+                    <label for="modal-training-name" class="block text-lg font-medium mb-2">Name/Label</label>
+                    <input type="text" id="modal-training-name" class="w-full p-4 border rounded-md bg-gray-700 text-white" placeholder="Enter a name or label for this image">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="modal-training-category" class="block text-lg font-medium mb-2">Category (Optional)</label>
+                    <input type="text" id="modal-training-category" class="w-full p-4 border rounded-md bg-gray-700 text-white" placeholder="Enter a category for this image">
+                </div>
+                
+                <div class="flex justify-end gap-4 mt-6">
+                    <button id="cancel-save-training" class="btn btn-outline">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button id="confirm-save-training" class="btn">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-
+    
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // DOM elements
-            const promptInput = document.getElementById('prompt');
-            const widthInput = document.getElementById('width');
-            const heightInput = document.getElementById('height');
-            const generateBtn = document.getElementById('generateBtn');
-            const resultDiv = document.getElementById('result');
-            const generatedImage = document.getElementById('generatedImage');
-            const loadingDiv = document.getElementById('loading');
-            const errorMessage = document.getElementById('error-message');
-            const imageInfo = document.getElementById('imageInfo');
-            const downloadBtn = document.getElementById('downloadBtn');
-            const faceEnhancement = document.getElementById('face-enhancement');
-            const aspectRatioBtns = document.querySelectorAll('.aspect-ratio-btn');
-            const promptSearch = document.getElementById('prompt-search');
-            const promptCategories = document.getElementById('prompt-categories');
-            const editImageBtn = document.getElementById('editImageBtn');
-            const optimizeImageBtn = document.getElementById('optimizeImageBtn');
-            const editPrompt = document.getElementById('edit-prompt');
-            const editCanvas = document.getElementById('edit-canvas');
-            const brushSize = document.getElementById('brush-size');
-            const brushSizeValue = document.getElementById('brush-size-value');
-            const clearCanvas = document.getElementById('clear-canvas');
-            const applyEdit = document.getElementById('apply-edit');
-            const editFaceEnhancement = document.getElementById('edit-face-enhancement');
-            const qualitySlider = document.getElementById('quality-slider');
-            const qualityValue = document.getElementById('quality-value');
-            const formatOptions = document.querySelectorAll('.format-option');
-            const optimizeWidth = document.getElementById('optimize-width');
-            const optimizeHeight = document.getElementById('optimize-height');
-            const maintainAspectRatio = document.getElementById('maintain-aspect-ratio');
-            const optimizedImage = document.getElementById('optimized-image');
-            const optimizeInfo = document.getElementById('optimize-info');
-            const applyOptimize = document.getElementById('apply-optimize');
-            const downloadOptimized = document.getElementById('download-optimized');
-
-            // State variables
-            let selectedStyle = 'photorealistic';
-            let currentImageBase64 = null;
-            let samplePrompts = {};
-            let ctx = null;
-            let isDrawing = false;
-            let currentBrushSize = 20;
-            let selectedFormat = 'png';
-            let optimizedImageBase64 = null;
-            let originalWidth = 512;
-            let originalHeight = 512;
-            let aspectRatio = 1;
-
-            // Tab functionality
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Deactivate existing tab
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-
-                    // Activate current tab
-                    tab.classList.add('active');
-                    document.getElementById(tab.dataset.tab).classList.add('active');
-
-                    // Initialize canvas when switching to edit tab
-                    if (tab.dataset.tab === 'edit' && currentImageBase64) {
-                        setTimeout(initCanvas, 100);
-                    }
-
-                    // Initialize optimize tab
-                    if (tab.dataset.tab === 'optimize' && currentImageBase64) {
-                        optimizedImage.src = generatedImage.src;
-                        optimizeWidth.value = originalWidth;
-                        optimizeHeight.value = originalHeight;
-                        updateOptimizeInfo();
-                    }
-                });
-            });
-
-            // Style selection
-            const styleCards = document.querySelectorAll('.style-card');
-            styleCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    // Remove 'selected' class from all cards
-                    styleCards.forEach(c => c.classList.remove('selected'));
-
-                    // Add 'selected' class to the clicked card
-                    this.classList.add('selected');
-
-                    // Update the selected style
-                    selectedStyle = this.dataset.style;
-                });
-            });
-
-            // Aspect ratio buttons
-            aspectRatioBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Remove 'selected' class from all buttons
-                    aspectRatioBtns.forEach(b => b.classList.remove('selected'));
-
-                    // Add 'selected' class to the clicked button
-                    this.classList.add('selected');
-
-                    // Update width and height inputs
-                    widthInput.value = this.dataset.width;
-                    heightInput.value = this.dataset.height;
-                });
-            });
-
-            // Format options
-            formatOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    formatOptions.forEach(o => o.classList.remove('selected'));
-                    this.classList.add('selected');
-                    selectedFormat = this.dataset.format;
-
-                    // Update preview
-                    if (currentImageBase64) {
-                        updateOptimizePreview();
-                    }
-                });
-            });
-
-            // Quality slider
-            qualitySlider.addEventListener('input', function() {
-                qualityValue.textContent = `${this.value}%`;
-
-                // Update preview with debounce
-                clearTimeout(this.timeout);
-                this.timeout = setTimeout(() => {
-                    if (currentImageBase64) {
-                        updateOptimizePreview();
-                    }
-                }, 300);
-            });
-
-            // Maintain aspect ratio
-            optimizeWidth.addEventListener('input', function() {
-                if (maintainAspectRatio.checked) {
-                    optimizeHeight.value = Math.round(this.value / aspectRatio);
+    document.addEventListener('DOMContentLoaded', function() {
+        // DOM elements
+        const promptInput = document.getElementById('prompt');
+        const widthInput = document.getElementById('width');
+        const heightInput = document.getElementById('height');
+        const generateBtn = document.getElementById('generateBtn');
+        const resultDiv = document.getElementById('result');
+        const generatedImage = document.getElementById('generatedImage');
+        const loadingDiv = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+        const imageInfo = document.getElementById('imageInfo');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const faceEnhancement = document.getElementById('face-enhancement');
+        const aspectRatioBtns = document.querySelectorAll('.aspect-ratio-btn');
+        const promptSearch = document.getElementById('prompt-search');
+        const promptCategories = document.getElementById('prompt-categories');
+        const editImageBtn = document.getElementById('editImageBtn');
+        const optimizeImageBtn = document.getElementById('optimizeImageBtn');
+        const editPrompt = document.getElementById('edit-prompt');
+        const editCanvas = document.getElementById('edit-canvas');
+        const brushSize = document.getElementById('brush-size');
+        const brushSizeValue = document.getElementById('brush-size-value');
+        const clearCanvas = document.getElementById('clear-canvas');
+        const applyEdit = document.getElementById('apply-edit');
+        const editFaceEnhancement = document.getElementById('edit-face-enhancement');
+        const qualitySlider = document.getElementById('quality-slider');
+        const qualityValue = document.getElementById('quality-value');
+        const formatOptions = document.querySelectorAll('.format-option');
+        const optimizeWidth = document.getElementById('optimize-width');
+        const optimizeHeight = document.getElementById('optimize-height');
+        const maintainAspectRatio = document.getElementById('maintain-aspect-ratio');
+        const optimizedImage = document.getElementById('optimized-image');
+        const optimizeInfo = document.getElementById('optimize-info');
+        const applyOptimize = document.getElementById('apply-optimize');
+        const downloadOptimized = document.getElementById('download-optimized');
+        const editProcessing = document.getElementById('edit-processing');
+        const optimizeProcessing = document.getElementById('optimize-processing');
+        const saveTrainingBtn = document.getElementById('saveTrainingBtn');
+        const saveTrainingModal = document.getElementById('save-training-modal');
+        const modalTrainingName = document.getElementById('modal-training-name');
+        const modalTrainingCategory = document.getElementById('modal-training-category');
+        const cancelSaveTraining = document.getElementById('cancel-save-training');
+        const confirmSaveTraining = document.getElementById('confirm-save-training');
+        const trainingImageUpload = document.getElementById('training-image-upload');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+        const trainingName = document.getElementById('training-name');
+        const trainingCategory = document.getElementById('training-category');
+        const saveTrainingImage = document.getElementById('save-training-image');
+        const trainingGrid = document.getElementById('training-grid');
+        const trainingEmpty = document.getElementById('training-empty');
+        
+        // State variables
+        let selectedStyle = 'photorealistic';
+        let currentImageBase64 = null;
+        let samplePrompts = {};
+        let ctx = null;
+        let isDrawing = false;
+        let currentBrushSize = 20;
+        let selectedFormat = 'png';
+        let optimizedImageBase64 = null;
+        let originalWidth = 512;
+        let originalHeight = 512;
+        let aspectRatio = 1;
+        let trainingImageBase64 = null;
+        
+        // Make sure processing overlays are hidden by default
+        if (editProcessing) editProcessing.style.display = 'none';
+        if (optimizeProcessing) optimizeProcessing.style.display = 'none';
+        
+        // Tab functionality
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Deactivate existing tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Activate current tab
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+                
+                // Initialize canvas when switching to edit tab
+                if (tab.dataset.tab === 'edit' && currentImageBase64) {
+                    setTimeout(initCanvas, 100);
                 }
-
-                // Update preview with debounce
-                clearTimeout(this.timeout);
-                this.timeout = setTimeout(() => {
-                    if (currentImageBase64) {
-                        updateOptimizePreview();
-                    }
-                }, 300);
-            });
-
-            optimizeHeight.addEventListener('input', function() {
-                if (maintainAspectRatio.checked) {
-                    optimizeWidth.value = Math.round(this.value * aspectRatio);
+                
+                // Initialize optimize tab
+                if (tab.dataset.tab === 'optimize' && currentImageBase64) {
+                    optimizedImage.src = generatedImage.src;
+                    optimizeWidth.value = originalWidth;
+                    optimizeHeight.value = originalHeight;
+                    updateOptimizeInfo();
                 }
-
-                // Update preview with debounce
-                clearTimeout(this.timeout);
-                this.timeout = setTimeout(() => {
-                    if (currentImageBase64) {
-                        updateOptimizePreview();
-                    }
-                }, 300);
-            });
-
-            // Initialize canvas
-            function initCanvas() {
-                if (!editCanvas) return;
-
-                ctx = editCanvas.getContext('2d');
-
-                // Set canvas size to match the image
-                if (generatedImage.complete) {
-                    resizeCanvas();
-                } else {
-                    generatedImage.onload = resizeCanvas;
+                
+                // Load training data when switching to training tab
+                if (tab.dataset.tab === 'training') {
+                    loadTrainingData();
                 }
-
-                // Canvas drawing events
-                editCanvas.addEventListener('mousedown', startDrawing);
-                editCanvas.addEventListener('mousemove', draw);
-                editCanvas.addEventListener('mouseup', stopDrawing);
-                editCanvas.addEventListener('mouseout', stopDrawing);
-
-                // Touch events for mobile
-                editCanvas.addEventListener('touchstart', handleTouch);
-                editCanvas.addEventListener('touchmove', handleTouch);
-                editCanvas.addEventListener('touchend', stopDrawing);
-
-                // Update brush size display
-                brushSize.addEventListener('input', function() {
-                    currentBrushSize = this.value;
-                    brushSizeValue.textContent = `${currentBrushSize}px`;
-                });
-
-                // Clear canvas button
-                clearCanvas.addEventListener('click', function() {
-                    ctx.clearRect(0, 0, editCanvas.width, editCanvas.height);
-                });
+            });
+        });
+        
+        // Style selection
+        const styleCards = document.querySelectorAll('.style-card');
+        styleCards.forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove 'selected' class from all cards
+                styleCards.forEach(c => c.classList.remove('selected'));
+                
+                // Add 'selected' class to the clicked card
+                this.classList.add('selected');
+                
+                // Update the selected style
+                selectedStyle = this.dataset.style;
+            });
+        });
+        
+        // Aspect ratio buttons
+        aspectRatioBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove 'selected' class from all buttons
+                aspectRatioBtns.forEach(b => b.classList.remove('selected'));
+                
+                // Add 'selected' class to the clicked button
+                this.classList.add('selected');
+                
+                // Update width and height inputs
+                widthInput.value = this.dataset.width;
+                heightInput.value = this.dataset.height;
+            });
+        });
+        
+        // Format options
+        formatOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                formatOptions.forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedFormat = this.dataset.format;
+                
+                // Update preview
+                if (currentImageBase64) {
+                    updateOptimizePreview();
+                }
+            });
+        });
+        
+        // Quality slider
+        qualitySlider.addEventListener('input', function() {
+            qualityValue.textContent = `${this.value}%`;
+            
+            // Update preview with debounce
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => {
+                if (currentImageBase64) {
+                    updateOptimizePreview();
+                }
+            }, 300);
+        });
+        
+        // Maintain aspect ratio
+        optimizeWidth.addEventListener('input', function() {
+            if (maintainAspectRatio.checked) {
+                optimizeHeight.value = Math.round(this.value / aspectRatio);
             }
-
-            function resizeCanvas() {
-                const container = document.getElementById('canvas-container');
-                const containerWidth = container.clientWidth;
-
-                // Set canvas dimensions
-                editCanvas.width = containerWidth;
-                editCanvas.height = (containerWidth / generatedImage.naturalWidth) * generatedImage.naturalHeight;
-
-                // Draw the image on the canvas
-                const img = new Image();
-                img.onload = function() {
-                    ctx.drawImage(img, 0, 0, editCanvas.width, editCanvas.height);
-                    ctx.globalAlpha = 0.5; // Set transparency for the mask
-                };
-                img.src = generatedImage.src;
-
-                // Clear any previous drawings
+            
+            // Update preview with debounce
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => {
+                if (currentImageBase64) {
+                    updateOptimizePreview();
+                }
+            }, 300);
+        });
+        
+        optimizeHeight.addEventListener('input', function() {
+            if (maintainAspectRatio.checked) {
+                optimizeWidth.value = Math.round(this.value * aspectRatio);
+            }
+            
+            // Update preview with debounce
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => {
+                if (currentImageBase64) {
+                    updateOptimizePreview();
+                }
+            }, 300);
+        });
+        
+        // Initialize canvas
+        function initCanvas() {
+            if (!editCanvas) return;
+            
+            ctx = editCanvas.getContext('2d');
+            
+            // Set canvas size to match the image
+            if (generatedImage.complete) {
+                resizeCanvas();
+            } else {
+                generatedImage.onload = resizeCanvas;
+            }
+            
+            // Canvas drawing events
+            editCanvas.addEventListener('mousedown', startDrawing);
+            editCanvas.addEventListener('mousemove', draw);
+            editCanvas.addEventListener('mouseup', stopDrawing);
+            editCanvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events for mobile
+            editCanvas.addEventListener('touchstart', handleTouch);
+            editCanvas.addEventListener('touchmove', handleTouch);
+            editCanvas.addEventListener('touchend', stopDrawing);
+            
+            // Update brush size display
+            brushSize.addEventListener('input', function() {
+                currentBrushSize = this.value;
+                brushSizeValue.textContent = `${currentBrushSize}px`;
+            });
+            
+            // Clear canvas button
+            clearCanvas.addEventListener('click', function() {
                 ctx.clearRect(0, 0, editCanvas.width, editCanvas.height);
+            });
+        }
+        
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            const containerWidth = container.clientWidth;
+            
+            // Set canvas dimensions
+            editCanvas.width = containerWidth;
+            editCanvas.height = (containerWidth / generatedImage.naturalWidth) * generatedImage.naturalHeight;
+            
+            // Draw the image on the canvas
+            const img = new Image();
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, editCanvas.width, editCanvas.height);
+                ctx.globalAlpha = 0.5; // Set transparency for the mask
+            };
+            img.src = generatedImage.src;
+            
+            // Clear any previous drawings
+            ctx.clearRect(0, 0, editCanvas.width, editCanvas.height);
+        }
+        
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            // Get mouse position
+            const rect = editCanvas.getBoundingClientRect();
+            let x, y;
+            
+            if (e.type.includes('mouse')) {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            } else {
+                // Touch event
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
             }
-
-            function startDrawing(e) {
-                isDrawing = true;
+            
+            // Draw
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(x, y, currentBrushSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+        }
+        
+        function handleTouch(e) {
+            e.preventDefault(); // Prevent scrolling when drawing
+            
+            if (e.type === 'touchstart') {
+                startDrawing(e);
+            } else if (e.type === 'touchmove') {
                 draw(e);
             }
-
-            function draw(e) {
-                if (!isDrawing) return;
-
-                // Get mouse position
-                const rect = editCanvas.getBoundingClientRect();
-                let x, y;
-
-                if (e.type.includes('mouse')) {
-                    x = e.clientX - rect.left;
-                    y = e.clientY - rect.top;
-                } else {
-                    // Touch event
-                    x = e.touches[0].clientX - rect.left;
-                    y = e.touches[0].clientY - rect.top;
-                }
-
-                // Draw
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(x, y, currentBrushSize, 0, Math.PI * 2);
-                ctx.fill();
+        }
+        
+        // Edit image button
+        editImageBtn.addEventListener('click', function() {
+            document.querySelector('.tab[data-tab="edit"]').click();
+        });
+        
+        // Optimize image button
+        optimizeImageBtn.addEventListener('click', function() {
+            document.querySelector('.tab[data-tab="optimize"]').click();
+        });
+        
+        // Apply edit
+        applyEdit.addEventListener('click', async function() {
+            if (!currentImageBase64 || !editPrompt.value.trim()) {
+                alert('Please provide an edit prompt');
+                return;
             }
-
-            function stopDrawing() {
-                isDrawing = false;
-            }
-
-            function handleTouch(e) {
-                e.preventDefault(); // Prevent scrolling when drawing
-
-                if (e.type === 'touchstart') {
-                    startDrawing(e);
-                } else if (e.type === 'touchmove') {
-                    draw(e);
-                }
-            }
-
-            // Edit image button
-            editImageBtn.addEventListener('click', function() {
-                document.querySelector('.tab[data-tab="edit"]').click();
-            });
-
-            // Optimize image button
-            optimizeImageBtn.addEventListener('click', function() {
-                document.querySelector('.tab[data-tab="optimize"]').click();
-            });
-
-            // Apply edit
-            applyEdit.addEventListener('click', async function() {
-                if (!currentImageBase64 || !editPrompt.value.trim()) {
-                    alert('Please provide an edit prompt');
-                    return;
-                }
-
-                // Get the mask from the canvas
+            
+            // Show edit processing animation
+            if (editProcessing) editProcessing.style.display = 'flex';
+            
+            try {
+                // Pre-compress the canvas mask to reduce size
                 const maskCanvas = document.createElement('canvas');
                 maskCanvas.width = editCanvas.width;
                 maskCanvas.height = editCanvas.height;
                 const maskCtx = maskCanvas.getContext('2d');
                 maskCtx.drawImage(editCanvas, 0, 0);
-
-                // Convert to base64
-                const maskBase64 = maskCanvas.toDataURL('image/png');
-
-                // Show loading
-                loadingDiv.classList.remove('hidden');
-
-                try {
-                    const formData = new FormData();
-                    formData.append('original_image', currentImageBase64);
-                    formData.append('mask', maskBase64);
-                    formData.append('prompt', editPrompt.value.trim());
-                    formData.append('style', selectedStyle);
-                    formData.append('face_enhancement', editFaceEnhancement.checked ? 'true' : 'false');
-
-                    const response = await fetch('/inpaint', {
-                        method: 'POST',
-                        body: formData
+                
+                // Convert to base64 with compression
+                const maskBase64 = maskCanvas.toDataURL('image/jpeg', 0.7); // Use JPEG with 70% quality
+                
+                // Pre-compress the original image if it's large
+                let compressedOriginal = currentImageBase64;
+                if (currentImageBase64.length > 500000) { // If larger than ~500KB
+                    const img = new Image();
+                    img.src = `data:image/png;base64,${currentImageBase64}`;
+                    
+                    await new Promise(resolve => {
+                        img.onload = resolve;
                     });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Update the image
-                        currentImageBase64 = data.image;
-                        generatedImage.src = `data:image/png;base64,${data.image}`;
-
-                        // Switch to view tab
-                        document.querySelector('.tab[data-tab="view"]').click();
-
-                        // Show result
-                        resultDiv.classList.remove('hidden');
-                    } else {
-                        throw new Error(data.error || 'Failed to edit image');
+                    
+                    // Create a canvas to resize and compress
+                    const canvas = document.createElement('canvas');
+                    // Limit max dimension to 1200px for very large images
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > 1200 || height > 1200) {
+                        if (width > height) {
+                            height = Math.round(height * (1200 / width));
+                            width = 1200;
+                        } else {
+                            width = Math.round(width * (1200 / height));
+                            height = 1200;
+                        }
                     }
-                } catch (error) {
-                    console.error('Error editing image:', error);
-                    alert('Error editing image: ' + error.message);
-                } finally {
-                    // Hide loading
-                    loadingDiv.classList.add('hidden');
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Convert to JPEG with 80% quality
+                    compressedOriginal = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
                 }
-            });
-
-            // Update optimize info
-            function updateOptimizeInfo() {
-                if (!optimizedImage.complete) return;
-
-                const width = optimizeWidth.value;
-                const height = optimizeHeight.value;
-                const quality = qualitySlider.value;
-
-                optimizeInfo.textContent = `${width}×${height} • ${selectedFormat.toUpperCase()} • ${quality}% quality`;
-            }
-
-            // Update optimize preview
-            async function updateOptimizePreview() {
-                try {
-                    const formData = new FormData();
-                    formData.append('image', currentImageBase64);
-                    formData.append('quality', qualitySlider.value);
-                    formData.append('format', selectedFormat);
-                    formData.append('width', optimizeWidth.value);
-                    formData.append('height', optimizeHeight.value);
-
-                    const response = await fetch('/optimize', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Update the preview image
-                        optimizedImageBase64 = data.image;
-                        optimizedImage.src = `data:image/${data.format};base64,${data.image}`;
-
-                        // Update info
-                        updateOptimizeInfo();
-                    }
-                } catch (error) {
-                    console.error('Error generating preview:', error);
-                }
-            }
-
-            // Apply optimization
-            applyOptimize.addEventListener('click', async function() {
-                if (!currentImageBase64) return;
-
-                try {
-                    const formData = new FormData();
-                    formData.append('image', currentImageBase64);
-                    formData.append('quality', qualitySlider.value);
-                    formData.append('format', selectedFormat);
-                    formData.append('width', optimizeWidth.value);
-                    formData.append('height', optimizeHeight.value);
-
-                    const response = await fetch('/optimize', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Update the image
-                        optimizedImageBase64 = data.image;
-                        optimizedImage.src = `data:image/${data.format};base64,${data.image}`;
-                        currentImageBase64 = data.image;
-                        generatedImage.src = `data:image/${data.format};base64,${data.image}`;
-
-                        // Update info
-                        updateOptimizeInfo();
-
-                        // Switch to view tab
-                        document.querySelector('.tab[data-tab="view"]').click();
-                    } else {
-                        throw new Error(data.error || 'Failed to optimize image');
-                    }
-                } catch (error) {
-                    console.error('Error optimizing image:', error);
-                    alert('Error optimizing image: ' + error.message);
-                }
-            });
-
-            // Download optimized image
-            downloadOptimized.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                if (!optimizedImageBase64) return;
-
-                const link = document.createElement('a');
-                link.href = `data:image/${selectedFormat};base64,${optimizedImageBase64}`;
-                link.download = `vision-forge-optimized-${Date.now()}.${selectedFormat}`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
-
-            // Fetch sample prompts
-            fetch('/sample_prompts')
-                .then(response => response.json())
-                .then(data => {
-                    samplePrompts = data;
-                    populatePromptLibrary(samplePrompts);
-                })
-                .catch(error => console.error('Error fetching sample prompts:', error));
-
-            // Populate prompt library
-            function populatePromptLibrary(prompts) {
-                promptCategories.innerHTML = '';
-
-                Object.keys(prompts).forEach(category => {
-                    const categoryDiv = document.createElement('div');
-                    categoryDiv.className = 'prompt-category';
-
-                    const categoryTitle = document.createElement('div');
-                    categoryTitle.className = 'category-title';
-                    categoryTitle.innerHTML = `<i class="fas fa-chevron-down"></i> ${category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ')} (${prompts[category].length})`;
-                    categoryTitle.addEventListener('click', () => {
-                        categoryTitle.classList.toggle('collapsed');
-                    });
-
-                    const promptList = document.createElement('div');
-                    promptList.className = 'prompt-list';
-
-                    prompts[category].forEach(prompt => {
-                        const promptItem = document.createElement('div');
-                        promptItem.className = 'prompt-item';
-                        promptItem.textContent = prompt;
-                        promptItem.addEventListener('click', () => {
-                            promptInput.value = prompt;
-                            // Switch to generate tab
-                            document.querySelector('.tab[data-tab="generate"]').click();
-                        });
-                        promptList.appendChild(promptItem);
-                    });
-
-                    categoryDiv.appendChild(categoryTitle);
-                    categoryDiv.appendChild(promptList);
-                    promptCategories.appendChild(categoryDiv);
+                
+                const formData = new FormData();
+                formData.append('original_image', compressedOriginal);
+                formData.append('mask', maskBase64);
+                formData.append('prompt', editPrompt.value.trim());
+                formData.append('style', selectedStyle);
+                formData.append('face_enhancement', editFaceEnhancement.checked ? 'true' : 'false');
+                
+                const response = await fetch('/inpaint', {
+                    method: 'POST',
+                    body: formData
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update the image
+                    currentImageBase64 = data.image;
+                    generatedImage.src = `data:image/${data.format};base64,${data.image}`;
+                    
+                    // Switch to view tab
+                    document.querySelector('.tab[data-tab="view"]').click();
+                    
+                    // Show result
+                    resultDiv.classList.remove('hidden');
+                } else {
+                    throw new Error(data.error || 'Failed to edit image');
+                }
+            } catch (error) {
+                console.error('Error editing image:', error);
+                alert('Error editing image: ' + error.message);
+            } finally {
+                // Hide edit processing animation
+                if (editProcessing) editProcessing.style.display = 'none';
             }
-
-            // Search prompts
-            promptSearch.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-
-                if (searchTerm.length < 2) {
-                    populatePromptLibrary(samplePrompts);
-                    return;
-                }
-
-                const filteredPrompts = {};
-
-                Object.keys(samplePrompts).forEach(category => {
-                    const matchingPrompts = samplePrompts[category].filter(prompt =>
-                        prompt.toLowerCase().includes(searchTerm)
-                    );
-
-                    if (matchingPrompts.length > 0) {
-                        filteredPrompts[category] = matchingPrompts;
-                    }
-                });
-
-                populatePromptLibrary(filteredPrompts);
-            });
-
-            function showError(message) {
-                errorMessage.textContent = message;
-                errorMessage.classList.remove('hidden');
-            }
-
-            // Generate image
-            generateBtn.addEventListener('click', async function() {
-                const prompt = promptInput.value.trim();
-                const width = parseInt(widthInput.value);
-                const height = parseInt(heightInput.value);
-
-                if (!prompt) {
-                    showError('Please enter a prompt to generate an image.');
-                    return;
-                }
-
-                if (isNaN(width) || isNaN(height) || width < 256 || height < 256) {
-                    showError('Dimensions must be at least 256px.');
-                    return;
-                }
-
-                // Hide previous results and errors, show loading
-                resultDiv.classList.add('hidden');
-                errorMessage.classList.add('hidden');
-                loadingDiv.classList.remove('hidden');
-
-                // Disable generate button
-                generateBtn.disabled = true;
-                generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-
-                try {
-                    const formData = new FormData();
-                    formData.append('prompt', prompt);
-                    formData.append('width', width);
-                    formData.append('height', height);
-                    formData.append('style', selectedStyle);
-                    formData.append('face_enhancement', faceEnhancement.checked ? 'true' : 'false');
-
-                    const response = await fetch('/generate', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Store the image data
-                        currentImageBase64 = data.image;
-                        originalWidth = data.width;
-                        originalHeight = data.height;
-                        aspectRatio = data.width / data.height;
-
-                        // Update optimize tab values
-                        optimizeWidth.value = data.width;
-                        optimizeHeight.value = data.height;
-
-                        // Display the generated image
-                        generatedImage.src = `data:image/png;base64,${data.image}`;
-                        imageInfo.textContent = `${data.width}×${data.height} • ${selectedStyle.replace('_', ' ')} style`;
-
-                        // Reset tabs to view
-                        document.querySelector('.tab[data-tab="view"]').click();
-
-                        // Show result, hide loading
-                        loadingDiv.classList.add('hidden');
-                        resultDiv.classList.remove('hidden');
-
-                        // Setup download button
-                        downloadBtn.onclick = function(e) {
-                            e.preventDefault();
-                            const link = document.createElement('a');
-                            link.href = `data:image/png;base64,${data.image}`;
-                            link.download = `vision-forge-${Date.now()}.png`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                        };
-                    } else {
-                        throw new Error(data.error || 'Failed to generate image');
-                    }
-                } catch (error) {
-                    loadingDiv.classList.add('hidden');
-                    showError(error.message);
-                } finally {
-                    // Re-enable generate button
-                    generateBtn.disabled = false;
-                    generateBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Image';
-                }
-            });
         });
+        
+        // Update optimize info
+        function updateOptimizeInfo() {
+            if (!optimizedImage.complete) return;
+            
+            const width = optimizeWidth.value;
+            const height = optimizeHeight.value;
+            const quality = qualitySlider.value;
+            
+            optimizeInfo.textContent = `${width}×${height} • ${selectedFormat.toUpperCase()} • ${quality}% quality`;
+        }
+        
+        // Update optimize preview
+        async function updateOptimizePreview() {
+            // Show optimize processing animation
+            if (optimizeProcessing) optimizeProcessing.style.display = 'flex';
+            
+            try {
+                const formData = new FormData();
+                formData.append('image', currentImageBase64);
+                formData.append('quality', qualitySlider.value);
+                formData.append('format', selectedFormat);
+                formData.append('width', optimizeWidth.value);
+                formData.append('height', optimizeHeight.value);
+                
+                const response = await fetch('/optimize', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update the preview image
+                    optimizedImageBase64 = data.image;
+                    optimizedImage.src = `data:image/${data.format};base64,${data.image}`;
+                    
+                    // Update info
+                    updateOptimizeInfo();
+                }
+            } catch (error) {
+                console.error('Error generating preview:', error);
+            } finally {
+                // Hide optimize processing animation
+                if (optimizeProcessing) optimizeProcessing.style.display = 'none';
+            }
+        }
+        
+        // Apply optimization
+        applyOptimize.addEventListener('click', async function() {
+            if (!currentImageBase64) return;
+            
+            // Show optimize processing animation
+            if (optimizeProcessing) optimizeProcessing.style.display = 'flex';
+            
+            try {
+                const formData = new FormData();
+                formData.append('image', currentImageBase64);
+                formData.append('quality', qualitySlider.value);
+                formData.append('format', selectedFormat);
+                formData.append('width', optimizeWidth.value);
+                formData.append('height', optimizeHeight.value);
+                
+                const response = await fetch('/optimize', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update the image
+                    optimizedImageBase64 = data.image;
+                    optimizedImage.src = `data:image/${data.format};base64,${data.image}`;
+                    currentImageBase64 = data.image;
+                    generatedImage.src = `data:image/${data.format};base64,${data.image}`;
+                    
+                    // Update info
+                    updateOptimizeInfo();
+                    
+                    // Switch to view tab
+                    document.querySelector('.tab[data-tab="view"]').click();
+                } else {
+                    throw new Error(data.error || 'Failed to optimize image');
+                }
+            } catch (error) {
+                console.error('Error optimizing image:', error);
+                alert('Error optimizing image: ' + error.message);
+            } finally {
+                // Hide optimize processing animation
+                if (optimizeProcessing) optimizeProcessing.style.display = 'none';
+            }
+        });
+        
+        // Download optimized image
+        downloadOptimized.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (!optimizedImageBase64) return;
+            
+            const link = document.createElement('a');
+            link.href = `data:image/${selectedFormat};base64,${optimizedImageBase64}`;
+            link.download = `vision-forge-optimized-${Date.now()}.${selectedFormat}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+        
+        // Save for training button
+        saveTrainingBtn.addEventListener('click', function() {
+            if (!currentImageBase64) return;
+            
+            // Show the modal
+            saveTrainingModal.classList.remove('hidden');
+        });
+        
+        // Cancel save training
+        cancelSaveTraining.addEventListener('click', function() {
+            saveTrainingModal.classList.add('hidden');
+            modalTrainingName.value = '';
+            modalTrainingCategory.value = '';
+        });
+        
+        // Confirm save training
+        confirmSaveTraining.addEventListener('click', async function() {
+            const name = modalTrainingName.value.trim();
+            const category = modalTrainingCategory.value.trim();
+            
+            if (!name) {
+                alert('Please provide a name for the training image');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('image', currentImageBase64);
+                formData.append('name', name);
+                if (category) formData.append('category', category);
+                
+                const response = await fetch('/train/save', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Image saved for training successfully!');
+                    saveTrainingModal.classList.add('hidden');
+                    modalTrainingName.value = '';
+                    modalTrainingCategory.value = '';
+                    
+                    // Switch to training tab
+                    document.querySelector('.tab[data-tab="training"]').click();
+                } else {
+                    throw new Error(data.error || 'Failed to save training image');
+                }
+            } catch (error) {
+                console.error('Error saving training image:', error);
+                alert('Error saving training image: ' + error.message);
+            }
+        });
+        
+        // Training image upload
+        trainingImageUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+            
+            // Read file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                trainingImageBase64 = e.target.result.split(',')[1];
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+                
+                // Enable save button if name is provided
+                if (trainingName.value.trim()) {
+                    saveTrainingImage.disabled = false;
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Training name input
+        trainingName.addEventListener('input', function() {
+            // Enable save button if image is provided
+            if (trainingImageBase64 && this.value.trim()) {
+                saveTrainingImage.disabled = false;
+            } else {
+                saveTrainingImage.disabled = true;
+            }
+        });
+        
+        // Save training image
+        saveTrainingImage.addEventListener('click', async function() {
+            const name = trainingName.value.trim();
+            const category = trainingCategory.value.trim();
+            
+            if (!trainingImageBase64 || !name) {
+                alert('Please provide both an image and a name');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('image', trainingImageBase64);
+                formData.append('name', name);
+                if (category) formData.append('category', category);
+                
+                const response = await fetch('/train/save', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Image saved for training successfully!');
+                    
+                    // Reset form
+                    trainingImageBase64 = null;
+                    previewContainer.style.display = 'none';
+                    trainingName.value = '';
+                    trainingCategory.value = '';
+                    saveTrainingImage.disabled = true;
+                    trainingImageUpload.value = '';
+                    
+                    // Reload training data
+                    loadTrainingData();
+                } else {
+                    throw new Error(data.error || 'Failed to save training image');
+                }
+            } catch (error) {
+                console.error('Error saving training image:', error);
+                alert('Error saving training image: ' + error.message);
+            }
+        });
+        
+        // Load training data
+        async function loadTrainingData() {
+            try {
+                const response = await fetch('/train/data');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const images = data.data.images;
+                    
+                    // Clear grid
+                    trainingGrid.innerHTML = '';
+                    
+                    // Check if there are any images
+                    if (Object.keys(images).length === 0) {
+                        trainingEmpty.style.display = 'block';
+                        trainingGrid.style.display = 'none';
+                    } else {
+                        trainingEmpty.style.display = 'none';
+                        trainingGrid.style.display = 'grid';
+                        
+                        // Add images to grid
+                        Object.keys(images).forEach(filename => {
+                            const image = images[filename];
+                            
+                            // Create card
+                            const card = document.createElement('div');
+                            card.className = 'training-card';
+                            
+                            // Create image
+                            const img = document.createElement('img');
+                            img.className = 'training-image';
+                            img.src = `/training_data/images/${filename}`;
+                            img.alt = image.name;
+                            
+                            // Create info
+                            const info = document.createElement('div');
+                            info.className = 'training-info';
+                            
+                            // Create name
+                            const name = document.createElement('div');
+                            name.className = 'training-name';
+                            name.textContent = image.name;
+                            
+                            // Create category
+                            const category = document.createElement('div');
+                            category.className = 'training-category';
+                            category.textContent = image.category || 'No category';
+                            
+                            // Create actions
+                            const actions = document.createElement('div');
+                            actions.className = 'training-actions';
+                            
+                            // Create delete button
+                            const deleteBtn = document.createElement('button');
+                            deleteBtn.className = 'training-action-btn delete';
+                            deleteBtn.textContent = 'Delete';
+                            deleteBtn.addEventListener('click', () => deleteTrainingImage(filename));
+                            
+                            // Append elements
+                            actions.appendChild(deleteBtn);
+                            info.appendChild(name);
+                            info.appendChild(category);
+                            info.appendChild(actions);
+                            card.appendChild(img);
+                            card.appendChild(info);
+                            trainingGrid.appendChild(card);
+                        });
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to load training data');
+                }
+            } catch (error) {
+                console.error('Error loading training data:', error);
+                alert('Error loading training data: ' + error.message);
+            }
+        }
+        
+        // Delete training image
+        async function deleteTrainingImage(filename) {
+            if (!confirm('Are you sure you want to delete this training image?')) return;
+            
+            try {
+                const formData = new FormData();
+                formData.append('filename', filename);
+                
+                const response = await fetch('/train/delete', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Training image deleted successfully!');
+                    
+                    // Reload training data
+                    loadTrainingData();
+                } else {
+                    throw new Error(data.error || 'Failed to delete training image');
+                }
+            } catch (error) {
+                console.error('Error deleting training image:', error);
+                alert('Error deleting training image: ' + error.message);
+            }
+        }
+        
+        // Fetch sample prompts
+        fetch('/sample_prompts')
+            .then(response => response.json())
+            .then(data => {
+                samplePrompts = data;
+                populatePromptLibrary(samplePrompts);
+            })
+            .catch(error => console.error('Error fetching sample prompts:', error));
+        
+        // Populate prompt library
+        function populatePromptLibrary(prompts) {
+            promptCategories.innerHTML = '';
+            
+            Object.keys(prompts).forEach(category => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'prompt-category';
+                
+                const categoryTitle = document.createElement('div');
+                categoryTitle.className = 'category-title';
+                categoryTitle.innerHTML = `<i class="fas fa-chevron-down"></i> ${category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ')} (${prompts[category].length})`;
+                categoryTitle.addEventListener('click', () => {
+                    categoryTitle.classList.toggle('collapsed');
+                });
+                
+                const promptList = document.createElement('div');
+                promptList.className = 'prompt-list';
+                
+                prompts[category].forEach(prompt => {
+                    const promptItem = document.createElement('div');
+                    promptItem.className = 'prompt-item';
+                    promptItem.textContent = prompt;
+                    promptItem.addEventListener('click', () => {
+                        promptInput.value = prompt;
+                        // Switch to generate tab
+                        document.querySelector('.tab[data-tab="generate"]').click();
+                    });
+                    promptList.appendChild(promptItem);
+                });
+                
+                categoryDiv.appendChild(categoryTitle);
+                categoryDiv.appendChild(promptList);
+                promptCategories.appendChild(categoryDiv);
+            });
+        }
+        
+        // Search prompts
+        promptSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            if (searchTerm.length < 2) {
+                populatePromptLibrary(samplePrompts);
+                return;
+            }
+            
+            const filteredPrompts = {};
+            
+            Object.keys(samplePrompts).forEach(category => {
+                const matchingPrompts = samplePrompts[category].filter(prompt => 
+                    prompt.toLowerCase().includes(searchTerm)
+                );
+                
+                if (matchingPrompts.length > 0) {
+                    filteredPrompts[category] = matchingPrompts;
+                }
+            });
+            
+            populatePromptLibrary(filteredPrompts);
+        });
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+        
+        // Generate image
+        generateBtn.addEventListener('click', async function() {
+            const prompt = promptInput.value.trim();
+            const width = parseInt(widthInput.value);
+            const height = parseInt(heightInput.value);
+            
+            if (!prompt) {
+                showError('Please enter a prompt to generate an image.');
+                return;
+            }
+            
+            if (isNaN(width) || isNaN(height) || width < 256 || height < 256) {
+                showError('Dimensions must be at least 256px.');
+                return;
+            }
+            
+            // Hide previous results and errors, show loading
+            resultDiv.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            loadingDiv.classList.remove('hidden');
+            
+            // Disable generate button
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('prompt', prompt);
+                formData.append('width', width);
+                formData.append('height', height);
+                formData.append('style', selectedStyle);
+                formData.append('face_enhancement', faceEnhancement.checked ? 'true' : 'false');
+                
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store the image data
+                    currentImageBase64 = data.image;
+                    originalWidth = data.width;
+                    originalHeight = data.height;
+                    aspectRatio = data.width / data.height;
+                    
+                    // Update optimize tab values
+                    optimizeWidth.value = data.width;
+                    optimizeHeight.value = data.height;
+                    
+                    // Display the generated image
+                    generatedImage.src = `data:image/png;base64,${data.image}`;
+                    imageInfo.textContent = `${data.width}×${data.height} • ${selectedStyle.replace('_', ' ')} style`;
+                    
+                    // Reset tabs to view
+                    document.querySelector('.tab[data-tab="view"]').click();
+                    
+                    // Show result, hide loading
+                    loadingDiv.classList.add('hidden');
+                    resultDiv.classList.remove('hidden');
+                    
+                    // Setup download button
+                    downloadBtn.onclick = function(e) {
+                        e.preventDefault();
+                        const link = document.createElement('a');
+                        link.href = `data:image/png;base64,${data.image}`;
+                        link.download = `vision-forge-${Date.now()}.png`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    };
+                } else {
+                    throw new Error(data.error || 'Failed to generate image');
+                }
+            } catch (error) {
+                loadingDiv.classList.add('hidden');
+                showError(error.message);
+            } finally {
+                // Re-enable generate button
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Image';
+            }
+        });
+    });
     </script>
 </body>
 </html>
